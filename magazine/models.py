@@ -35,7 +35,7 @@ class Magazine(models.Model):
 
 
 class Comment(models.Model):
-    content = models.CharField(max_length=300)
+    content = models.TextField()
     created_at = models.DateTimeField(auto_now=True)
     magazine = models.ForeignKey(Magazine, on_delete=models.CASCADE)
     user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
