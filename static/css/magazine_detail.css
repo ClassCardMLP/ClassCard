@@ -1,0 +1,129 @@
+
+/*=================== Comment================== */
+
+.mzdetail-comment-create{
+  display:flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem 0 4rem;
+  border-bottom: solid 1px #828b9747;
+}
+
+.mzdetail-comment-title{
+  margin: 2rem 0;
+  text-align: center;
+  font-size: 2rem;
+  color: #757d89;
+  font-weight: bold;
+}
+
+.mzdetail-comment-form{
+  display: flex;
+  align-items: center;
+}
+
+.mzdetail-comment-input-box{
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.mzdetail-comment-write{
+  height: 78px;
+  width: 50vw;
+}
+
+.mzdetail-comment-rate{
+ width: 20vw;
+}
+
+.mzbtn-detail-comment{
+  height: 140px;
+  margin-left:2rem;
+  border-radius: 10px;
+  border: 0px;
+  color: white;
+  background-color: #666e78;
+}
+
+.mzbtn-detail-comment:hover{
+  background-color: #666e7852;
+}
+
+.mzdetail-comment-detail{
+  display: flex;
+  margin: 2rem 15% 0;
+  padding: 1rem 0;
+}
+
+.mzdetail-comment-review{
+  width: 75%;
+  background-color: #738ffd;
+  border-radius: 10px;
+  padding: 1rem;
+}
+
+.mzdetail-comment-user {
+  color:#666e78;
+  font-size: 1.2rem;
+}
+
+.mzdetail-comment-content{
+  margin-bottom: 0.4rem;
+  color: white;
+  font-size: 1.4rem;
+}
+
+.mzdetail-comment-user{
+  width: 200px;
+}
+
+.mzdetail-comment-time {
+  color:#f9f9f98e;
+  font-size: 0.8rem;
+}
+
+.mzdetail-comment-update,
+.mzdetail-comment-delete {
+  color: #666e78;
+}
+
+.mzdetail-comment-update:hover,
+.mzdetail-comment-delete:hover {
+  color: #738ffd;
+  cursor: pointer;
+}
+
+.mzcomment-update-form-style{
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.mzcomment-update-rate{
+  margin-bottom: 1rem;
+  border-radius: 10px;
+  padding: 0.3rem;
+  border: 0px;
+  color: #738ffd;
+}
+
+.mzcomment-update-content{
+  width: 90%;
+  margin-bottom: 1rem;
+  border-radius: 10px;
+  border: 0px;
+  padding: 0.3rem;
+  color: #6a717b;
+}
+
+.mzcomment-control-update,
+.mzcomment-control-update-exit{
+  color: white;
+}
+
+.mzcomment-control-update:hover,
+.mzcomment-control-update-exit:hover{
+  color: #6a717b;
+  cursor: pointer;
+}

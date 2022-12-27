@@ -106,3 +106,6 @@ def delete(request):
         "compare_cards": compare_cards,
     }
     return render(request, "accounts/check_delete.html", context)
+
+
+# 테스트

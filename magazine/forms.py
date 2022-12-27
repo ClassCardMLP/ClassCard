@@ -18,6 +18,3 @@ class MagazineCommentForm(ModelForm):
     class Meta:
         model = Comment
         fields = ('content','grade',)
-        widgets = {
-            'grade' : NumberInput(attrs={'min':'1','max':'5'}) 
-        }

@@ -7,6 +7,7 @@ from django.db.models import Avg
 from django.http import HttpResponseForbidden, JsonResponse
 from django.views.decorators.http import require_POST
 from card.models import Card, CompareCard, Benefit
+import json
 
 # Create your views here.
 
@@ -75,7 +76,7 @@ def detail(request, pk):
 
     magazine = Magazine.objects.get(pk=pk)
     mzcomment_form = MagazineCommentForm()
-    mzcomments = magazine.comment_set.all()
+    mzcomments = magazine.comment_set.all().order_by("-created_at")
     context = {
         "compare_cards": compare_cards,
         "magazine": magazine,
@@ -129,7 +130,9 @@ def delete_magazine(request, pk):
 
 @login_required(login_url="/login/")
 def mzcomment_create(request, pk):
-    magazine = get_object_or_404(Magazine, pk=pk)
+    magazine = Magazine.objects.get(pk = pk)
+    user = request.user.pk
+
     if request.method == "POST":
         form = MagazineCommentForm(request.POST)
         if form.is_valid():
@@ -137,22 +140,98 @@ def mzcomment_create(request, pk):
             mzcomment_form.magazine = magazine
             mzcomment_form.user = request.user
             mzcomment_form.save()
-    else:
-        messages.warning(request, "비정상적인 접근")
 
-    return redirect("magazine:detail", pk)
+    comments = Comment.objects.filter(magazine_id = pk).order_by("-created_at")
+    comment_data = []
+
+    for comment in comments:
+        comment_data.append(
+            {
+                "user_id": comment.user.id,
+                "comment_id": comment.id,
+                "userName": comment.user.username,
+                "grade": comment.grade,
+                "content": comment.content,
+                "create": comment.created_at,
+            }
+        )
+
+    data = {
+        "commentData": comment_data,
+        "user": user,
+        "mzId": magazine.pk,
+    }    
+
+    return JsonResponse(data)
 
 
 @login_required(login_url="/login/")
 def mzcomment_delete(request, mz_pk, mzcm_pk):
     magazine = Magazine.objects.get(pk=mz_pk)
     mzcomment = Comment.objects.get(pk=mzcm_pk)
+    user = request.user.pk
+
     if request.user == mzcomment.user:
         mzcomment.magazine = magazine
         mzcomment.delete()
-        return redirect("magazine:detail", mz_pk)
-    else:
-        return HttpResponseForbidden()
+
+    comments = Comment.objects.filter(magazine_id = mz_pk).order_by("-created_at")
+    comment_data = []
+
+    for comment in comments:
+        comment_data.append(
+            {
+                "user_id": comment.user.id,
+                "comment_id": comment.id,
+                "userName": comment.user.username,
+                "grade": comment.grade,
+                "content": comment.content,
+                "create": comment.created_at,
+            }
+        )
+
+    data = {
+        "commentData": comment_data,
+        "user": user,
+        "mzId": magazine.pk,
+    }    
+
+    return JsonResponse(data)
+
+def mzcomment_update(request, mz_pk, mzcm_pk):
+    magazine = Magazine.objects.get(pk=mz_pk)
+    mzcomment = Comment.objects.get(pk=mzcm_pk)
+    user = request.user.pk
+
+    jsonObject = json.loads(request.body)
+
+    if request.method == "POST":
+        mzcomment.content = jsonObject.get("content")
+        mzcomment.grade = jsonObject.get("grade")
+        mzcomment.save()
+
+    comments = Comment.objects.filter(magazine_id = mz_pk).order_by("-created_at")
+    comment_data = []
+
+    for comment in comments:
+        comment_data.append(
+            {
+                "user_id": comment.user.id,
+                "comment_id": comment.id,
+                "userName": comment.user.username,
+                "grade": comment.grade,
+                "content": comment.content,
+                "create": comment.created_at,
+            }
+        )
+
+    data = {
+        "commentData": comment_data,
+        "user": user,
+        "mzId": magazine.pk,
+    }
+
+    return JsonResponse(data)
 
 
 def magazine_bookmark(request, mz_pk):
