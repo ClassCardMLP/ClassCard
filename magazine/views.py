@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Magazine, Comment
-from .forms import MagazineForm, MagazineCommentForm
+from .forms import MagazineForm, MagazineCommentForm, ReplyCommentForm
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Avg
@@ -76,12 +76,14 @@ def detail(request, pk):
 
     magazine = Magazine.objects.get(pk=pk)
     mzcomment_form = MagazineCommentForm()
+    reply_comment_form = ReplyCommentForm()
     mzcomments = magazine.comment_set.all().order_by("-created_at")
     context = {
         "compare_cards": compare_cards,
         "magazine": magazine,
         "mzcomment_form": mzcomment_form,
         "mzcomments": mzcomments,
+        "reply_comment": reply_comment_form,
     }
     return render(request, "magazine/detail.html", context)
 

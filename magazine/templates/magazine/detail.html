@@ -6,6 +6,7 @@
 {% block css %}
   <link rel="stylesheet" href="{% static 'css/magazine.css' %}">
   <link rel="stylesheet" href="{% static 'css/magazine_detail.css' %}">
+  
 {% endblock css %}
 
 {% block body %}
@@ -57,7 +58,7 @@
 <div style='padding-bottom:5rem; background-color: #ebebeb;'>
   <div class="mzdetail-comment-create container">
     <p class="mzdetail-comment-title">댓글 작성</p>
-    <form action="{% url 'magazine:mzcomment_create' magazine.pk %}" method="POST" class="mzdetail-comment-form" data-mag-id="{{ magazine.pk }}">
+    <form action="" method="POST" class="mzdetail-comment-form" data-mag-id="{{ magazine.pk }}">
       <div class="mzdetail-comment-input-box">
         {% csrf_token %}
         <div>
@@ -91,6 +92,14 @@
               <p class="mzdetail-comment-rate">{{ comment.get_grade_display }}</p>
               <p class="mzdetail-comment-content">{{ comment.content }}</p>
               <p class="mzdetail-comment-time">{{ comment.created_at }}</p>
+              <div class="reply">
+                <p class="reply-show">답글 달기</p>
+                <form action="" method="POST" style="display:none;">
+                  {% csrf_token %}
+                  {% render_field reply_comment.content class="reply-write form-control" placeholder='답글 작성' style='height: 40px; width: 100%; margin-bottom: 0.5rem;' %}
+                  <input class="mzbtn-reply" type="submit" value="답글 게시">
+                </form>
+              </div>
             </div>
             {% if request.user == comment.user %}
             <form class="mzcomment-update-form form-comment-update-{{ comment.pk }}" id="form-comment-update-okBtn-{{ comment.pk }}" action="{% url 'card:comment_update' magazine.id comment.pk %}" method="post" style="display:none">

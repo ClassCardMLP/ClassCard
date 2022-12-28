@@ -18,3 +18,8 @@ class MagazineCommentForm(ModelForm):
     class Meta:
         model = Comment
         fields = ('content','grade',)
+
+class ReplyCommentForm(ModelForm):
+    class Meta:
+        model = Comment
+        fields = ('content',)

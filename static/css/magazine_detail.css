@@ -127,3 +127,27 @@
   color: #6a717b;
   cursor: pointer;
 }
+
+/* 대댓글 */
+.mzbtn-reply{
+  border-radius: 30px;
+  background-color: #ffffff00;
+  border: 0px;
+  color: white;
+}
+
+.mzbtn-reply:hover{
+  color: #6a717b;
+  cursor: pointer;
+}
+
+.reply-show{
+  margin-bottom: 0;
+  font-size: 12px;
+  color: white;
+}
+
+.reply-show:hover{
+  color: #6a717b;
+  cursor: pointer;
+}
