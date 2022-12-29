@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Magazine, Comment
+from .models import Magazine, Comment, Reply
 from .forms import MagazineForm, MagazineCommentForm, ReplyCommentForm
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -78,6 +78,8 @@ def detail(request, pk):
     mzcomment_form = MagazineCommentForm()
     reply_comment_form = ReplyCommentForm()
     mzcomments = magazine.comment_set.all().order_by("-created_at")
+
+    
     context = {
         "compare_cards": compare_cards,
         "magazine": magazine,
@@ -145,6 +147,7 @@ def mzcomment_create(request, pk):
 
     comments = Comment.objects.filter(magazine_id = pk).order_by("-created_at")
     comment_data = []
+    reply_data = []
 
     for comment in comments:
         comment_data.append(
@@ -158,7 +161,29 @@ def mzcomment_create(request, pk):
             }
         )
 
+        if comment.reply_set.all().count() != 0:
+            reply_cnt = comment.reply_set.all().count()
+            i = reply_cnt - 1
+            recomment =[]
+            while i != -1:
+                reply = comment.reply_set.all()[i]
+                recomment.append({
+                    "reply_user_id" : reply.user.id,
+                    "comment_id" : reply.comment.id,
+                    "reply_user" : reply.user.username,
+                    "reply_content" : reply.content,
+                    "reply_created" : reply.created_at,
+                })
+                i -= 1
+                
+            reply_data.append(recomment)
+        else:
+            reply_data.append([])
+
+    print(reply_data)
+
     data = {
+        "replyData" : reply_data,
         "commentData": comment_data,
         "user": user,
         "mzId": magazine.pk,
@@ -234,6 +259,34 @@ def mzcomment_update(request, mz_pk, mzcm_pk):
     }
 
     return JsonResponse(data)
+
+def reply_create(request, mz_pk, mzcm_pk):
+    magazine = Magazine.objects.get(pk=mz_pk)
+    mzcomment = Comment.objects.get(pk=mzcm_pk)
+    user = request.user.pk
+
+    if request.method == "POST":
+        reply_form = ReplyCommentForm(request.POST)
+        if reply_form.is_valid():
+            mzreply_form = reply_form.save(commit=False)
+            mzreply_form.magazine = magazine
+            mzreply_form.comment = mzcomment
+            mzreply_form.user = request.user
+            mzreply_form.save()
+
+        return redirect('magazine:detail', magazine.pk)
+
+def reply_delete(request, mz_pk, mzcm_pk, mzreply_pk):
+    magazine = Magazine.objects.get(pk=mz_pk)
+    mzcomment = Comment.objects.get(pk=mzcm_pk)
+    reply = Reply.objects.get(pk = mzreply_pk)
+    user = request.user.pk
+
+    if request.user == reply.user:
+        reply.delete()
+
+
+    return redirect('magazine:detail', magazine.pk)
 
 
 def magazine_bookmark(request, mz_pk):

@@ -151,3 +151,37 @@
   color: #6a717b;
   cursor: pointer;
 }
+
+.replies{
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  border-radius: 10px;
+  padding: 5px;
+  background: #afc0ffa1;
+}
+
+.replies-user,
+.replies-content{
+  margin-bottom: 0;
+  margin-left: 0.5rem;
+  font-size: 13px;
+  color: white;
+}
+
+.replies-user:hover{
+  cursor: pointer;
+  color: #6a717b;
+}
+
+.replies-delete{
+  margin-bottom: 0;
+  margin-left: 0.5rem;
+  font-size: 10px;
+  color: white;
+}
+
+.replies-delete:hover{
+  cursor: pointer;
+  color: rgb(255, 121, 121);
+}

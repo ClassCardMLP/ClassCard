@@ -1,5 +1,5 @@
 from django.forms import ModelForm, NumberInput
-from .models import Magazine, Comment
+from .models import Magazine, Comment, Reply
 from django_summernote.widgets import SummernoteWidget, SummernoteInplaceWidget
 
 
@@ -21,5 +21,5 @@ class MagazineCommentForm(ModelForm):
 
 class ReplyCommentForm(ModelForm):
     class Meta:
-        model = Comment
+        model = Reply
         fields = ('content',)

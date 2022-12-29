@@ -39,9 +39,13 @@ class Comment(models.Model):
     created_at = models.DateTimeField(auto_now=True)
     magazine = models.ForeignKey(Magazine, on_delete=models.CASCADE)
     user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
-    parent_comment = models.ForeignKey(
-        "self", on_delete=models.CASCADE, related_name="recomment", null=True
-    )
     grade = models.CharField(
         max_length=10, choices=rate_choice
     )
+
+class Reply(models.Model):
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now=True)
+    comment = models.ForeignKey(Comment, on_delete=models.CASCADE)
+    magazine = models.ForeignKey(Magazine, on_delete=models.CASCADE)
+    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
