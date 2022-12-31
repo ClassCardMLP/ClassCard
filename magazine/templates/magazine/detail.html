@@ -93,25 +93,31 @@
               <p class="mzdetail-comment-content">{{ comment.content }}</p>
               <p class="mzdetail-comment-time">{{ comment.created_at }}</p>
               
-              {% for reply in comment.reply_set.all %}
-              <div class="replies">
-                <a href="{% url 'accounts:profile' reply.user.username %}" class="replies-user"><span style="margin-right:1rem">↳</span>{{ reply.user }}</a>
-                <p class="replies-content"><span style="margin-right: 0.7rem;">|</span>{{ reply.content }}</p>
-                {% if request.user == reply.user %}
-                <a href="{% url 'magazine:reply_delete' magazine.pk comment.pk reply.pk %}" class="replies-delete">삭제하기</a>
-                {% endif %}
+              <div class="reply-box">
+                <div class="replies">
+                {% for reply in comment.reply_set.all %}
+                  <div class="reply-info">
+                    <a href="{% url 'accounts:profile' reply.user.username %}" class="replies-user"><span style="margin-right:1rem">↳</span>{{ reply.user }}</a>
+                    <p class="replies-content"><span style="margin-right: 0.7rem;">|</span>{{ reply.content }}</p>
+                    {% if request.user == reply.user %}
+                    <a href="{% url 'magazine:reply_delete' magazine.pk comment.pk reply.pk %}" class="replies-delete">삭제하기</a>
+                    {% endif %}
+                  </div>
+                {% endfor %}
+                </div>
+                
+                <div class="reply">
+                  <p class="reply-show">답글 달기</p>
+                  <form action="{% url 'magazine:reply_create' magazine.pk comment.pk %}" method="POST" style="">
+                    {% csrf_token %}
+                    {% render_field reply_comment.content class="reply-write form-control" placeholder='답글 작성' style='height: 40px; width: 100%; margin-bottom: 0.5rem;' %}
+                    <input class="mzbtn-reply" type="submit" value="답글 게시">
+                  </form>
+                </div>
               </div>
-              {% endfor %}
-              
-              <div class="reply">
-                <p class="reply-show">답글 달기</p>
-                <form action="{% url 'magazine:reply_create' magazine.pk comment.pk %}" method="POST" style="">
-                  {% csrf_token %}
-                  {% render_field reply_comment.content class="reply-write form-control" placeholder='답글 작성' style='height: 40px; width: 100%; margin-bottom: 0.5rem;' %}
-                  <input class="mzbtn-reply" type="submit" value="답글 게시">
-                </form>
-              </div>
+            
             </div>
+
             {% if request.user == comment.user %}
             <form class="mzcomment-update-form form-comment-update-{{ comment.pk }}" id="form-comment-update-okBtn-{{ comment.pk }}" action="{% url 'card:comment_update' magazine.id comment.pk %}" method="post" style="display:none">
               {% csrf_token %}
@@ -182,7 +188,7 @@
       const mzId = response.data.mzId
       const replyData = response.data.replyData
 
-      for (i = 0 ; i < commentData.length; i++) {
+      for (let i = 0 ; i < commentData.length; i++) {
 
         let grade = commentData[i].grade
 
@@ -215,8 +221,22 @@
                 <p class="mzdetail-comment-rate">${ grade }</p>
                 <p class="mzdetail-comment-content">${ commentData[i].content }</p>
                 <p class="mzdetail-comment-time">${ commentData[i].create }</p>
+
+                <div class="reply-box">
+                  <div class="replies">
+                  </div>
+                  
+                  <div class="reply">
+                    <p class="reply-show">답글 달기</p>
+                    <form action="/magazine/${ mzId }/reply_create/${ commentData[i].comment_id }/" method="POST" style="">
+                      <textarea name="content" cols="40" rows="10" style="height: 40px; width 100%; margin-bottom: 0.5rem;" placeholder="답글 작성" class="reply-write form-control" id="id_content" required></textarea>
+                      <input class="mzbtn-reply" type="submit" value="답글 게시">
+                    </form>
+                  </div>
+                </div>
+
               </div>
-              <form class="mzcomment-update-form form-comment-update-${ commentData[i].comment_id }" id="form-comment-update-okBtn-${ commentData[i].comment_id }" action="/card/comment_update/${ mzId }/${ commentData[i].comment_id }/" method="post" style="display:none">
+              <form class="mzcomment-update-form form-comment-update-${ commentData[i].comment_id }" id="form-comment-update-okBtn-${ commentData[i].comment_id }" action="/magazine/${ mzId }/mzcomment_update/${ commentData[i].comment_id }/" method="post" style="display:none">
                 <div class="mzcomment-update-form-style">
                   <select class="mzcomment-update-rate" id="comment-update-rate-${ commentData[i].comment_id }" value="${ commentData[i].grade }">
                     <option selected value="${ commentData[i].grade }">${grade}</option>
@@ -249,6 +269,20 @@
                   <p class="mzdetail-comment-rate">${ grade }</p>
                   <p class="mzdetail-comment-content">${ commentData[i].content }</p>
                   <p class="mzdetail-comment-time">${ commentData[i].create }</p>
+
+                  <div class="reply-box">
+                    <div class="replies">
+                    </div>
+                    
+                    <div class="reply">
+                      <p class="reply-show">답글 달기</p>
+                      <form action="/magazine/${ mzId }/reply_create/${ commentData[i].comment_id }/" method="POST" style="">
+                        <textarea name="content" cols="40" rows="10" style="height: 40px; width 100%; margin-bottom: 0.5rem;" placeholder="답글 작성" class="reply-write form-control" id="id_content" required></textarea>
+                        <input class="mzbtn-reply" type="submit" value="답글 게시">
+                      </form>
+                    </div>
+                  </div>
+
                 </div>
               </div>
             </div>
@@ -256,6 +290,39 @@
           `
           )
         }
+
+        console.log(replyData[i].length)
+
+
+        if (replyData[i].length > 0) {
+        
+        const replies = document.querySelector(".replies")
+        replies.textContent = ""
+
+          for (let j = 0 ; j < replyData[i].length ; j++) {
+
+            console.log(replyData[i][j].reply_content)
+            
+            // 대댓글을 단 사람이랑 현재 로그인을 한 사람의 pk가 동일할 때
+            if (replyData[i][j].reply_user_id === user) {
+              replies.insertAdjacentHTML('beforeend', `
+              <div class="reply-info">
+                  <a href="/accounts/profile/${ replyData[i][j].reply_user }/" class="replies-user"><span style="margin-right:1rem">↳</span>${ replyData[i][j].reply_user }</a>
+                  <p class="replies-content"><span style="margin-right: 0.7rem;">|</span>${ replyData[i][j].reply_content }</p>
+                  <a href="/magazine/${ mzId }/${ commentData[i].comment_id }/reply_delete/${ replyData[i][j].reply_comment_id }/" class="replies-delete">삭제하기</a>
+              </div>
+              `)
+            } else {
+              replies.insertAdjacentHTML('beforeend', `
+                <div class="reply-info">
+                  <a href="/accounts/profile/${ replyData[i][j].reply_user }/" class="replies-user"><span style="margin-right:1rem">↳</span>${ replyData[i][j].reply_user }</a>
+                  <p class="replies-content"><span style="margin-right: 0.7rem;">|</span>${ replyData[i][j].reply_content }</p>
+                </div>
+                `)
+            }
+          }
+        }
+
       }
     })
     commentForm.reset()
@@ -280,7 +347,7 @@
       const user = response.data.user
       const mzId = response.data.mzId
 
-      for (i = 0 ; i < commentData.length; i++) {
+      for (let i = 0 ; i < commentData.length; i++) {
 
         let grade = commentData[i].grade
 
@@ -313,7 +380,7 @@
                 <p class="mzdetail-comment-content">${ commentData[i].content }</p>
                 <p class="mzdetail-comment-time">${ commentData[i].create }</p>
               </div>
-              <form class="mzcomment-update-form form-comment-update-${ commentData[i].comment_id }" id="form-comment-update-okBtn-${ commentData[i].comment_id }" action="/card/comment_update/${ mzId }/${ commentData[i].comment_id }/" method="post" style="display:none">
+              <form class="mzcomment-update-form form-comment-update-${ commentData[i].comment_id }" id="form-comment-update-okBtn-${ commentData[i].comment_id }" action="/magazine/${ mzId }/mzcomment_update/${ commentData[i].comment_id }/" method="post" style="display:none">
                 <div class="mzcomment-update-form-style">
                   <select class="mzcomment-update-rate" id="comment-update-rate-${ commentData[i].comment_id }" value="${ commentData[i].grade }">
                     <option selected value="${ commentData[i].grade }">${grade}</option>
@@ -380,7 +447,7 @@
       const user = response.data.user
       const mzId = response.data.mzId
 
-      for (i = 0 ; i < commentData.length; i++) {
+      for (let i = 0 ; i < commentData.length; i++) {
 
         let grade = commentData[i].grade
 
@@ -415,7 +482,7 @@
                 <p class="mzdetail-comment-content">${ commentData[i].content }</p>
                 <p class="mzdetail-comment-time">${ commentData[i].create }</p>
               </div>
-              <form class="mzcomment-update-form form-comment-update-${ commentData[i].comment_id }" id="form-comment-update-okBtn-${ commentData[i].comment_id }" action="/card/comment_update/${ mzId }/${ commentData[i].comment_id }/" method="post" style="display:none">
+              <form class="mzcomment-update-form form-comment-update-${ commentData[i].comment_id }" id="form-comment-update-okBtn-${ commentData[i].comment_id }" action="/magazine/${ mzId }/mzcomment_update/${ commentData[i].comment_id }/" method="post" style="display:none">
                 <div class="mzcomment-update-form-style">
                   <select class="mzcomment-update-rate" id="comment-update-rate-${ commentData[i].comment_id }" value="${ commentData[i].grade }">
                     <option selected>${grade}</option>

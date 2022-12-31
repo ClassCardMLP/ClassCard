@@ -169,7 +169,7 @@ def mzcomment_create(request, pk):
                 reply = comment.reply_set.all()[i]
                 recomment.append({
                     "reply_user_id" : reply.user.id,
-                    "comment_id" : reply.comment.id,
+                    "reply_comment_id" : reply.comment.id,
                     "reply_user" : reply.user.username,
                     "reply_content" : reply.content,
                     "reply_created" : reply.created_at,

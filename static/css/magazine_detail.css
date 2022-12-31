@@ -152,7 +152,7 @@
   cursor: pointer;
 }
 
-.replies{
+.reply-info{
   display: flex;
   align-items: center;
   margin-bottom: 0.5rem;
