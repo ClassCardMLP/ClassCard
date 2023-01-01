@@ -223,7 +223,7 @@
                 <p class="mzdetail-comment-time">${ commentData[i].create }</p>
 
                 <div class="reply-box">
-                  <div class="replies">
+                  <div class="replies-${ i }">
                   </div>
                   
                   <div class="reply">
@@ -271,7 +271,7 @@
                   <p class="mzdetail-comment-time">${ commentData[i].create }</p>
 
                   <div class="reply-box">
-                    <div class="replies">
+                    <div class="replies-${ i }">
                     </div>
                     
                     <div class="reply">
@@ -291,13 +291,10 @@
           )
         }
 
-        console.log(replyData[i].length)
-
+        const replies = document.querySelector(`.replies-${ i }`)
+        replies.textContent = ""
 
         if (replyData[i].length > 0) {
-        
-        const replies = document.querySelector(".replies")
-        replies.textContent = ""
 
           for (let j = 0 ; j < replyData[i].length ; j++) {
 
@@ -346,6 +343,7 @@
       const commentData = response.data.commentData
       const user = response.data.user
       const mzId = response.data.mzId
+      const replyData = response.data.replyData
 
       for (let i = 0 ; i < commentData.length; i++) {
 
@@ -364,62 +362,120 @@
         }
 
         if (user === commentData[i].user_id) {
-        comments.insertAdjacentHTML('beforeend', `
-        <div class="mzdetail-comment">
-          <div class="mzdetail-comment-detail">
-            <div class="d-flex flex-column">
-              <a href="/accounts/profile/${commentData[i].userName}/" class="mzdetail-comment-user">${ commentData[i].userName }</a>
-              <div style="margin-top:10px; display:flex">
-                <p class="mzdetail-comment-update" onclick="comment_update(this)" id="okBtn-${ commentData[i].comment_id }" data-magup-id="${ mzId }" data-commentup-id="${ commentData[i].comment_id }">수정</p>
-                <p class="mzdetail-comment-delete" onclick="comment_delete(this)" id="comment-delete-${ commentData[i].comment_id }" data-magdel-id="${ mzId }" data-commentdel-id="${ commentData[i].comment_id }" style="margin-left: 1.5rem;">삭제</p>
-              </div>
-            </div>
-            <div class="mzdetail-comment-review">
-              <div class="mzdetail-comment-review-okBtn-${ commentData[i].comment_id } review-comment-update-${ commentData[i].comment_id }" style="display:block;">
-                <p class="mzdetail-comment-rate">${ grade }</p>
-                <p class="mzdetail-comment-content">${ commentData[i].content }</p>
-                <p class="mzdetail-comment-time">${ commentData[i].create }</p>
-              </div>
-              <form class="mzcomment-update-form form-comment-update-${ commentData[i].comment_id }" id="form-comment-update-okBtn-${ commentData[i].comment_id }" action="/magazine/${ mzId }/mzcomment_update/${ commentData[i].comment_id }/" method="post" style="display:none">
-                <div class="mzcomment-update-form-style">
-                  <select class="mzcomment-update-rate" id="comment-update-rate-${ commentData[i].comment_id }" value="${ commentData[i].grade }">
-                    <option selected value="${ commentData[i].grade }">${grade}</option>
-                    <option value="1">⭐</option>
-                    <option value="2">⭐⭐</option>
-                    <option value="3">⭐⭐⭐</option>
-                    <option value="4">⭐⭐⭐⭐</option>
-                    <option value="5">⭐⭐⭐⭐⭐</option>
-                  </select>
-                  <input class="mzcomment-update-content" id="comment-update-input-${ commentData[i].comment_id }" type="text" value="${ commentData[i].content }">
-                  <div class="d-flex">
-                    <p class="mzcomment-control-update" onclick="comment_update_ok(this)" id="comment-update-ok-${ commentData[i].comment_id }" data-magup-id="${ mzId }" data-commentup-id="${ commentData[i].comment_id }">수정 완료</p>
-                    <p class="mzcomment-control-update-exit ms-3" onclick="comment_update_exit(this)" id="comment-update-${ commentData[i].comment_id }">취소</p>
-                  </div>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-        `
-        )} else {
           comments.insertAdjacentHTML('beforeend', `
           <div class="mzdetail-comment">
             <div class="mzdetail-comment-detail">
               <div class="d-flex flex-column">
                 <a href="/accounts/profile/${commentData[i].userName}/" class="mzdetail-comment-user">${ commentData[i].userName }</a>
+                <div style="margin-top:10px; display:flex">
+                  <p class="mzdetail-comment-update" onclick="comment_update(this)" id="okBtn-${ commentData[i].comment_id }" data-magup-id="${ mzId }" data-commentup-id="${ commentData[i].comment_id }">수정</p>
+                  <p class="mzdetail-comment-delete" onclick="comment_delete(this)" id="comment-delete-${ commentData[i].comment_id }" data-magdel-id="${ mzId }" data-commentdel-id="${ commentData[i].comment_id }" style="margin-left: 1.5rem;">삭제</p>
+                </div>
               </div>
               <div class="mzdetail-comment-review">
                 <div class="mzdetail-comment-review-okBtn-${ commentData[i].comment_id } review-comment-update-${ commentData[i].comment_id }" style="display:block;">
                   <p class="mzdetail-comment-rate">${ grade }</p>
                   <p class="mzdetail-comment-content">${ commentData[i].content }</p>
                   <p class="mzdetail-comment-time">${ commentData[i].create }</p>
+  
+                  <div class="reply-box">
+                    <div class="replies-${ i }">
+                    </div>
+                    
+                    <div class="reply">
+                      <p class="reply-show">답글 달기</p>
+                      <form action="/magazine/${ mzId }/reply_create/${ commentData[i].comment_id }/" method="POST" style="">
+                        <textarea name="content" cols="40" rows="10" style="height: 40px; width 100%; margin-bottom: 0.5rem;" placeholder="답글 작성" class="reply-write form-control" id="id_content" required></textarea>
+                        <input class="mzbtn-reply" type="submit" value="답글 게시">
+                      </form>
+                    </div>
+                  </div>
+  
                 </div>
+                <form class="mzcomment-update-form form-comment-update-${ commentData[i].comment_id }" id="form-comment-update-okBtn-${ commentData[i].comment_id }" action="/magazine/${ mzId }/mzcomment_update/${ commentData[i].comment_id }/" method="post" style="display:none">
+                  <div class="mzcomment-update-form-style">
+                    <select class="mzcomment-update-rate" id="comment-update-rate-${ commentData[i].comment_id }" value="${ commentData[i].grade }">
+                      <option selected value="${ commentData[i].grade }">${grade}</option>
+                      <option value="1">⭐</option>
+                      <option value="2">⭐⭐</option>
+                      <option value="3">⭐⭐⭐</option>
+                      <option value="4">⭐⭐⭐⭐</option>
+                      <option value="5">⭐⭐⭐⭐⭐</option>
+                    </select>
+                    <input class="mzcomment-update-content" id="comment-update-input-${ commentData[i].comment_id }" type="text" value="${ commentData[i].content }">
+                    <div class="d-flex">
+                      <p class="mzcomment-control-update" onclick="comment_update_ok(this)" id="comment-update-ok-${ commentData[i].comment_id }" data-magup-id="${ mzId }" data-commentup-id="${ commentData[i].comment_id }">수정 완료</p>
+                      <p class="mzcomment-control-update-exit ms-3" onclick="comment_update_exit(this)" id="comment-update-${ commentData[i].comment_id }">취소</p>
+                    </div>
+                  </div>
+                </form>
               </div>
             </div>
           </div>
           `
+          )} else {
+            comments.insertAdjacentHTML('beforeend', `
+            <div class="mzdetail-comment">
+              <div class="mzdetail-comment-detail">
+                <div class="d-flex flex-column">
+                  <a href="/accounts/profile/${commentData[i].userName}/" class="mzdetail-comment-user">${ commentData[i].userName }</a>
+                </div>
+                <div class="mzdetail-comment-review">
+                  <div class="mzdetail-comment-review-okBtn-${ commentData[i].comment_id } review-comment-update-${ commentData[i].comment_id }" style="display:block;">
+                    <p class="mzdetail-comment-rate">${ grade }</p>
+                    <p class="mzdetail-comment-content">${ commentData[i].content }</p>
+                    <p class="mzdetail-comment-time">${ commentData[i].create }</p>
+  
+                    <div class="reply-box">
+                      <div class="replies-${ i }">
+                      </div>
+                      
+                      <div class="reply">
+                        <p class="reply-show">답글 달기</p>
+                        <form action="/magazine/${ mzId }/reply_create/${ commentData[i].comment_id }/" method="POST" style="">
+                          <textarea name="content" cols="40" rows="10" style="height: 40px; width 100%; margin-bottom: 0.5rem;" placeholder="답글 작성" class="reply-write form-control" id="id_content" required></textarea>
+                          <input class="mzbtn-reply" type="submit" value="답글 게시">
+                        </form>
+                      </div>
+                    </div>
+  
+                  </div>
+                </div>
+              </div>
+            </div>
+            `
           )
         }
+
+        const replies = document.querySelector(`.replies-${ i }`)
+        replies.textContent = ""
+
+        if (replyData[i].length > 0) {
+
+          for (let j = 0 ; j < replyData[i].length ; j++) {
+
+            console.log(replyData[i][j].reply_content)
+            
+            // 대댓글을 단 사람이랑 현재 로그인을 한 사람의 pk가 동일할 때
+            if (replyData[i][j].reply_user_id === user) {
+              replies.insertAdjacentHTML('beforeend', `
+              <div class="reply-info">
+                  <a href="/accounts/profile/${ replyData[i][j].reply_user }/" class="replies-user"><span style="margin-right:1rem">↳</span>${ replyData[i][j].reply_user }</a>
+                  <p class="replies-content"><span style="margin-right: 0.7rem;">|</span>${ replyData[i][j].reply_content }</p>
+                  <a href="/magazine/${ mzId }/${ commentData[i].comment_id }/reply_delete/${ replyData[i][j].reply_comment_id }/" class="replies-delete">삭제하기</a>
+              </div>
+              `)
+            } else {
+              replies.insertAdjacentHTML('beforeend', `
+                <div class="reply-info">
+                  <a href="/accounts/profile/${ replyData[i][j].reply_user }/" class="replies-user"><span style="margin-right:1rem">↳</span>${ replyData[i][j].reply_user }</a>
+                  <p class="replies-content"><span style="margin-right: 0.7rem;">|</span>${ replyData[i][j].reply_content }</p>
+                </div>
+                `)
+            }
+          }
+        }
+
       }
     })
   }
@@ -446,6 +502,7 @@
       const commentData = response.data.commentData
       const user = response.data.user
       const mzId = response.data.mzId
+      const replyData = response.data.replyData
 
       for (let i = 0 ; i < commentData.length; i++) {
 
@@ -466,62 +523,120 @@
         }
 
         if (user === commentData[i].user_id) {
-        comments.insertAdjacentHTML('beforeend', `
-                <div class="mzdetail-comment">
-          <div class="mzdetail-comment-detail">
-            <div class="d-flex flex-column">
-              <a href="/accounts/profile/${commentData[i].userName}/" class="mzdetail-comment-user">${ commentData[i].userName }</a>
-              <div style="margin-top:10px; display:flex">
-                <p class="mzdetail-comment-update" onclick="comment_update(this)" id="okBtn-${ commentData[i].comment_id }" data-magup-id="${ mzId }" data-commentup-id="${ commentData[i].comment_id }">수정</p>
-                <p class="mzdetail-comment-delete" onclick="comment_delete(this)" id="comment-delete-${ commentData[i].comment_id }" data-magdel-id="${ mzId }" data-commentdel-id="${ commentData[i].comment_id }" style="margin-left: 1.5rem;">삭제</p>
-              </div>
-            </div>
-            <div class="mzdetail-comment-review">
-              <div class="mzdetail-comment-review-okBtn-${ commentData[i].comment_id } review-comment-update-${ commentData[i].comment_id }" style="display:block;">
-                <p class="mzdetail-comment-rate">${ grade }</p>
-                <p class="mzdetail-comment-content">${ commentData[i].content }</p>
-                <p class="mzdetail-comment-time">${ commentData[i].create }</p>
-              </div>
-              <form class="mzcomment-update-form form-comment-update-${ commentData[i].comment_id }" id="form-comment-update-okBtn-${ commentData[i].comment_id }" action="/magazine/${ mzId }/mzcomment_update/${ commentData[i].comment_id }/" method="post" style="display:none">
-                <div class="mzcomment-update-form-style">
-                  <select class="mzcomment-update-rate" id="comment-update-rate-${ commentData[i].comment_id }" value="${ commentData[i].grade }">
-                    <option selected>${grade}</option>
-                    <option value="1">⭐</option>
-                    <option value="2">⭐⭐</option>
-                    <option value="3">⭐⭐⭐</option>
-                    <option value="4">⭐⭐⭐⭐</option>
-                    <option value="5">⭐⭐⭐⭐⭐</option>
-                  </select>
-                  <input class="mzcomment-update-content" id="comment-update-input-${ commentData[i].comment_id }" type="text" value="${ commentData[i].content }">
-                  <div class="d-flex">
-                    <p class="mzcomment-control-update" onclick="comment_update_ok(this)" id="comment-update-ok-${ commentData[i].comment_id }" data-magup-id="${ mzId }" data-commentup-id="${ commentData[i].comment_id }">수정 완료</p>
-                    <p class="mzcomment-control-update-exit ms-3" onclick="comment_update_exit(this)" id="comment-update-${ commentData[i].comment_id }">취소</p>
-                  </div>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-        `
-        )} else {
           comments.insertAdjacentHTML('beforeend', `
           <div class="mzdetail-comment">
             <div class="mzdetail-comment-detail">
               <div class="d-flex flex-column">
                 <a href="/accounts/profile/${commentData[i].userName}/" class="mzdetail-comment-user">${ commentData[i].userName }</a>
+                <div style="margin-top:10px; display:flex">
+                  <p class="mzdetail-comment-update" onclick="comment_update(this)" id="okBtn-${ commentData[i].comment_id }" data-magup-id="${ mzId }" data-commentup-id="${ commentData[i].comment_id }">수정</p>
+                  <p class="mzdetail-comment-delete" onclick="comment_delete(this)" id="comment-delete-${ commentData[i].comment_id }" data-magdel-id="${ mzId }" data-commentdel-id="${ commentData[i].comment_id }" style="margin-left: 1.5rem;">삭제</p>
+                </div>
               </div>
               <div class="mzdetail-comment-review">
                 <div class="mzdetail-comment-review-okBtn-${ commentData[i].comment_id } review-comment-update-${ commentData[i].comment_id }" style="display:block;">
                   <p class="mzdetail-comment-rate">${ grade }</p>
                   <p class="mzdetail-comment-content">${ commentData[i].content }</p>
                   <p class="mzdetail-comment-time">${ commentData[i].create }</p>
+  
+                  <div class="reply-box">
+                    <div class="replies-${ i }">
+                    </div>
+                    
+                    <div class="reply">
+                      <p class="reply-show">답글 달기</p>
+                      <form action="/magazine/${ mzId }/reply_create/${ commentData[i].comment_id }/" method="POST" style="">
+                        <textarea name="content" cols="40" rows="10" style="height: 40px; width 100%; margin-bottom: 0.5rem;" placeholder="답글 작성" class="reply-write form-control" id="id_content" required></textarea>
+                        <input class="mzbtn-reply" type="submit" value="답글 게시">
+                      </form>
+                    </div>
+                  </div>
+  
                 </div>
+                <form class="mzcomment-update-form form-comment-update-${ commentData[i].comment_id }" id="form-comment-update-okBtn-${ commentData[i].comment_id }" action="/magazine/${ mzId }/mzcomment_update/${ commentData[i].comment_id }/" method="post" style="display:none">
+                  <div class="mzcomment-update-form-style">
+                    <select class="mzcomment-update-rate" id="comment-update-rate-${ commentData[i].comment_id }" value="${ commentData[i].grade }">
+                      <option selected value="${ commentData[i].grade }">${grade}</option>
+                      <option value="1">⭐</option>
+                      <option value="2">⭐⭐</option>
+                      <option value="3">⭐⭐⭐</option>
+                      <option value="4">⭐⭐⭐⭐</option>
+                      <option value="5">⭐⭐⭐⭐⭐</option>
+                    </select>
+                    <input class="mzcomment-update-content" id="comment-update-input-${ commentData[i].comment_id }" type="text" value="${ commentData[i].content }">
+                    <div class="d-flex">
+                      <p class="mzcomment-control-update" onclick="comment_update_ok(this)" id="comment-update-ok-${ commentData[i].comment_id }" data-magup-id="${ mzId }" data-commentup-id="${ commentData[i].comment_id }">수정 완료</p>
+                      <p class="mzcomment-control-update-exit ms-3" onclick="comment_update_exit(this)" id="comment-update-${ commentData[i].comment_id }">취소</p>
+                    </div>
+                  </div>
+                </form>
               </div>
             </div>
           </div>
           `
+          )} else {
+            comments.insertAdjacentHTML('beforeend', `
+            <div class="mzdetail-comment">
+              <div class="mzdetail-comment-detail">
+                <div class="d-flex flex-column">
+                  <a href="/accounts/profile/${commentData[i].userName}/" class="mzdetail-comment-user">${ commentData[i].userName }</a>
+                </div>
+                <div class="mzdetail-comment-review">
+                  <div class="mzdetail-comment-review-okBtn-${ commentData[i].comment_id } review-comment-update-${ commentData[i].comment_id }" style="display:block;">
+                    <p class="mzdetail-comment-rate">${ grade }</p>
+                    <p class="mzdetail-comment-content">${ commentData[i].content }</p>
+                    <p class="mzdetail-comment-time">${ commentData[i].create }</p>
+  
+                    <div class="reply-box">
+                      <div class="replies-${ i }">
+                      </div>
+                      
+                      <div class="reply">
+                        <p class="reply-show">답글 달기</p>
+                        <form action="/magazine/${ mzId }/reply_create/${ commentData[i].comment_id }/" method="POST" style="">
+                          <textarea name="content" cols="40" rows="10" style="height: 40px; width 100%; margin-bottom: 0.5rem;" placeholder="답글 작성" class="reply-write form-control" id="id_content" required></textarea>
+                          <input class="mzbtn-reply" type="submit" value="답글 게시">
+                        </form>
+                      </div>
+                    </div>
+  
+                  </div>
+                </div>
+              </div>
+            </div>
+            `
           )
         }
+
+        const replies = document.querySelector(`.replies-${ i }`)
+        replies.textContent = ""
+
+        if (replyData[i].length > 0) {
+
+          for (let j = 0 ; j < replyData[i].length ; j++) {
+
+            console.log(replyData[i][j].reply_content)
+            
+            // 대댓글을 단 사람이랑 현재 로그인을 한 사람의 pk가 동일할 때
+            if (replyData[i][j].reply_user_id === user) {
+              replies.insertAdjacentHTML('beforeend', `
+              <div class="reply-info">
+                  <a href="/accounts/profile/${ replyData[i][j].reply_user }/" class="replies-user"><span style="margin-right:1rem">↳</span>${ replyData[i][j].reply_user }</a>
+                  <p class="replies-content"><span style="margin-right: 0.7rem;">|</span>${ replyData[i][j].reply_content }</p>
+                  <a href="/magazine/${ mzId }/${ commentData[i].comment_id }/reply_delete/${ replyData[i][j].reply_comment_id }/" class="replies-delete">삭제하기</a>
+              </div>
+              `)
+            } else {
+              replies.insertAdjacentHTML('beforeend', `
+                <div class="reply-info">
+                  <a href="/accounts/profile/${ replyData[i][j].reply_user }/" class="replies-user"><span style="margin-right:1rem">↳</span>${ replyData[i][j].reply_user }</a>
+                  <p class="replies-content"><span style="margin-right: 0.7rem;">|</span>${ replyData[i][j].reply_content }</p>
+                </div>
+                `)
+            }
+          }
+        }
+
       }
     })
   } 

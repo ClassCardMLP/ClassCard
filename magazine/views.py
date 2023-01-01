@@ -180,8 +180,6 @@ def mzcomment_create(request, pk):
         else:
             reply_data.append([])
 
-    print(reply_data)
-
     data = {
         "replyData" : reply_data,
         "commentData": comment_data,
@@ -204,6 +202,7 @@ def mzcomment_delete(request, mz_pk, mzcm_pk):
 
     comments = Comment.objects.filter(magazine_id = mz_pk).order_by("-created_at")
     comment_data = []
+    reply_data = []
 
     for comment in comments:
         comment_data.append(
@@ -217,7 +216,27 @@ def mzcomment_delete(request, mz_pk, mzcm_pk):
             }
         )
 
+        if comment.reply_set.all().count() != 0:
+            reply_cnt = comment.reply_set.all().count()
+            i = reply_cnt - 1
+            recomment =[]
+            while i != -1:
+                reply = comment.reply_set.all()[i]
+                recomment.append({
+                    "reply_user_id" : reply.user.id,
+                    "reply_comment_id" : reply.comment.id,
+                    "reply_user" : reply.user.username,
+                    "reply_content" : reply.content,
+                    "reply_created" : reply.created_at,
+                })
+                i -= 1
+                
+            reply_data.append(recomment)
+        else:
+            reply_data.append([])
+
     data = {
+        "replyData" : reply_data,
         "commentData": comment_data,
         "user": user,
         "mzId": magazine.pk,
@@ -239,6 +258,7 @@ def mzcomment_update(request, mz_pk, mzcm_pk):
 
     comments = Comment.objects.filter(magazine_id = mz_pk).order_by("-created_at")
     comment_data = []
+    reply_data = []
 
     for comment in comments:
         comment_data.append(
@@ -252,11 +272,31 @@ def mzcomment_update(request, mz_pk, mzcm_pk):
             }
         )
 
+        if comment.reply_set.all().count() != 0:
+            reply_cnt = comment.reply_set.all().count()
+            i = reply_cnt - 1
+            recomment =[]
+            while i != -1:
+                reply = comment.reply_set.all()[i]
+                recomment.append({
+                    "reply_user_id" : reply.user.id,
+                    "reply_comment_id" : reply.comment.id,
+                    "reply_user" : reply.user.username,
+                    "reply_content" : reply.content,
+                    "reply_created" : reply.created_at,
+                })
+                i -= 1
+                
+            reply_data.append(recomment)
+        else:
+            reply_data.append([])
+
     data = {
+        "replyData" : reply_data,
         "commentData": comment_data,
         "user": user,
         "mzId": magazine.pk,
-    }
+    }  
 
     return JsonResponse(data)
 
