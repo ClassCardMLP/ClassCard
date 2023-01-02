@@ -94,26 +94,26 @@
               <p class="mzdetail-comment-time">{{ comment.created_at }}</p>
               
               <div class="reply-box">
-                <div class="replies">
+                <div class="replies-{{ comment.pk }}">
                 {% for reply in comment.reply_set.all %}
                   <div class="reply-info">
                     <a href="{% url 'accounts:profile' reply.user.username %}" class="replies-user"><span style="margin-right:1rem">↳</span>{{ reply.user }}</a>
                     <p class="replies-content"><span style="margin-right: 0.7rem;">|</span>{{ reply.content }}</p>
                     {% if request.user == reply.user %}
-                    <a href="{% url 'magazine:reply_delete' magazine.pk comment.pk reply.pk %}" class="replies-delete">삭제하기</a>
+                    <p class="replies-delete" id="replies-delete-{{ reply.id }}" onclick="reply_delete(this)" data-mag-id="{{ magazine.id }}" data-com-id="{{ comment.pk }}" data-reply-id="{{ reply.id }}">삭제하기</p>
                     {% endif %}
                   </div>
                 {% endfor %}
                 </div>
                 
                 <div class="reply">
-                  <p class="reply-show" onclick="reply_create_open(this)" id="reply-{{ comment.pk }}" style="display:block;">답글 달기</p>
-                  <form action="" class="form-reply" id="form-reply-{{ comment.pk }}" method="POST" data-mag-id="{{ magazine.pk }}" data-com-id="{{ comment.pk }}" style="margin-top: 2rem; display: none;">
+                  <p class="reply-show" onclick="reply_create_open(this)" id="reply-create-{{ comment.pk }}" style="display:block;">답글 달기</p>
+                  <form action="" class="form-reply" id="form-reply-create-{{ comment.pk }}" method="POST" data-mag-id="{{ magazine.pk }}" data-com-id="{{ comment.pk }}" style="margin-top: 2rem; display: none;">
                     {% csrf_token %}
                     {% render_field reply_comment.content class="reply-write form-control" placeholder='답글 작성' style='height: 40px; width: 100%; margin-bottom: 0.5rem;' %}
                     <div style="display: flex;">
-                      <input class="mzbtn-reply" type="submit" value="답글 게시">
-                      <p class="mzbtn-cancel" onclick="reply_create_cancel(this)" id="reply-{{ comment.pk }}">취소</p>
+                      <input class="mzbtn-reply" onclick="reply_create(this)" id="reply-create-{{ comment.pk }}" type="submit" value="답글 게시">
+                      <p class="mzbtn-cancel" onclick="reply_create_cancel(this)" id="reply-create-{{ comment.pk }}">취소</p>
                     </div>
                   </form>
                 </div>
@@ -233,10 +233,13 @@
                   </div>
                   
                   <div class="reply">
-                    <p class="reply-show">답글 달기</p>
-                    <form action="/magazine/${ mzId }/reply_create/${ commentData[i].comment_id }/" method="POST" style="">
-                      <textarea name="content" cols="40" rows="10" style="height: 40px; width 100%; margin-bottom: 0.5rem;" placeholder="답글 작성" class="reply-write form-control" id="id_content" required></textarea>
-                      <input class="mzbtn-reply" type="submit" value="답글 게시">
+                    <p class="reply-show" onclick="reply_create_open(this)" id="reply-create-${ commentData[i].comment_id }" style="display:block;">답글 달기</p>
+                    <form action="" class="form-reply" id="form-reply-create-${ commentData[i].comment_id }" method="POST" data-mag-id="${ mzId }" data-com-id="${ commentData[i].comment_id }" style="margin-top: 2rem; display: none;">
+                      <textarea name="content" cols="40" rows="10" style="height: 40px; width: 100%; margin-bottom: 0.5rem;" placeholder="답글 작성" class="reply-write form-control" required id="id_content"></textarea>
+                      <div style="display: flex;">
+                        <input class="mzbtn-reply" onclick="reply_create(this)" id="reply-create-${ commentData[i].comment_id }" type="submit" value="답글 게시">
+                        <p class="mzbtn-cancel" onclick="reply_create_cancel(this)" id="reply-create-${ commentData[i].comment_id }">취소</p>
+                      </div>
                     </form>
                   </div>
                 </div>
@@ -281,10 +284,13 @@
                     </div>
                     
                     <div class="reply">
-                      <p class="reply-show">답글 달기</p>
-                      <form action="/magazine/${ mzId }/reply_create/${ commentData[i].comment_id }/" method="POST" style="">
-                        <textarea name="content" cols="40" rows="10" style="height: 40px; width 100%; margin-bottom: 0.5rem;" placeholder="답글 작성" class="reply-write form-control" id="id_content" required></textarea>
-                        <input class="mzbtn-reply" type="submit" value="답글 게시">
+                      <p class="reply-show" onclick="reply_create_open(this)" id="reply-create-${ commentData[i].comment_id }" style="display:block;">답글 달기</p>
+                      <form action="" class="form-reply" id="form-reply-create-${ commentData[i].comment_id }" method="POST" data-mag-id="${ mzId }" data-com-id="${ commentData[i].comment_id }" style="margin-top: 2rem; display: none;">
+                        <textarea name="content" cols="40" rows="10" style="height: 40px; width: 100%; margin-bottom: 0.5rem;" placeholder="답글 작성" class="reply-write form-control" required id="id_content"></textarea>
+                        <div style="display: flex;">
+                          <input class="mzbtn-reply" onclick="reply_create(this)" id="reply-create-${ commentData[i].comment_id }" type="submit" value="답글 게시">
+                          <p class="mzbtn-cancel" onclick="reply_create_cancel(this)" id="reply-create-${ commentData[i].comment_id }">취소</p>
+                        </div>
                       </form>
                     </div>
                   </div>
@@ -309,17 +315,17 @@
             if (replyData[i][j].reply_user_id === user) {
               replies.insertAdjacentHTML('beforeend', `
               <div class="reply-info">
-                  <a href="/accounts/profile/${ replyData[i][j].reply_user }/" class="replies-user"><span style="margin-right:1rem">↳</span>${ replyData[i][j].reply_user }</a>
-                  <p class="replies-content"><span style="margin-right: 0.7rem;">|</span>${ replyData[i][j].reply_content }</p>
-                  <a href="/magazine/${ mzId }/${ commentData[i].comment_id }/reply_delete/${ replyData[i][j].reply_id }/" class="replies-delete">삭제하기</a>
+                <a href="/accounts/profile/${ replyData[i][j].reply_user }/" class="replies-user"><span style="margin-right:1rem">↳</span>${ replyData[i][j].reply_user }</a>
+                <p class="replies-content"><span style="margin-right: 0.7rem;">|</span>${ replyData[i][j].reply_content }</p>
+                <p class="replies-delete" id="replies-delete-${ replyData[i][j].reply_id }" onclick="reply_delete(this)" data-mag-id="${ mzId }" data-com-id="${ commentData[i].comment_id }" data-reply-id="${ replyData[i][j].reply_id }">삭제하기</p>
               </div>
-              `)
-            } else {
-              replies.insertAdjacentHTML('beforeend', `
-                <div class="reply-info">
-                  <a href="/accounts/profile/${ replyData[i][j].reply_user }/" class="replies-user"><span style="margin-right:1rem">↳</span>${ replyData[i][j].reply_user }</a>
-                  <p class="replies-content"><span style="margin-right: 0.7rem;">|</span>${ replyData[i][j].reply_content }</p>
-                </div>
+            `)
+          } else {
+            replies.insertAdjacentHTML('beforeend', `
+              <div class="reply-info">
+                <a href="/accounts/profile/${ replyData[i][j].reply_user }/" class="replies-user"><span style="margin-right:1rem">↳</span>${ replyData[i][j].reply_user }</a>
+                <p class="replies-content"><span style="margin-right: 0.7rem;">|</span>${ replyData[i][j].reply_content }</p>
+              </div>
                 `)
             }
           }
@@ -386,10 +392,13 @@
                     </div>
                     
                     <div class="reply">
-                      <p class="reply-show">답글 달기</p>
-                      <form action="/magazine/${ mzId }/reply_create/${ commentData[i].comment_id }/" method="POST" style="">
-                        <textarea name="content" cols="40" rows="10" style="height: 40px; width 100%; margin-bottom: 0.5rem;" placeholder="답글 작성" class="reply-write form-control" id="id_content" required></textarea>
-                        <input class="mzbtn-reply" type="submit" value="답글 게시">
+                      <p class="reply-show" onclick="reply_create_open(this)" id="reply-create-${ commentData[i].comment_id }" style="display:block;">답글 달기</p>
+                      <form action="" class="form-reply" id="form-reply-create-${ commentData[i].comment_id }" method="POST" data-mag-id="${ mzId }" data-com-id="${ commentData[i].comment_id }" style="margin-top: 2rem; display: none;">
+                        <textarea name="content" cols="40" rows="10" style="height: 40px; width: 100%; margin-bottom: 0.5rem;" placeholder="답글 작성" class="reply-write form-control" required id="id_content"></textarea>
+                        <div style="display: flex;">
+                          <input class="mzbtn-reply" onclick="reply_create(this)" id="reply-create-${ commentData[i].comment_id }" type="submit" value="답글 게시">
+                          <p class="mzbtn-cancel" onclick="reply_create_cancel(this)" id="reply-create-${ commentData[i].comment_id }">취소</p>
+                        </div>
                       </form>
                     </div>
                   </div>
@@ -434,10 +443,13 @@
                       </div>
                       
                       <div class="reply">
-                        <p class="reply-show">답글 달기</p>
-                        <form action="/magazine/${ mzId }/reply_create/${ commentData[i].comment_id }/" method="POST" style="">
-                          <textarea name="content" cols="40" rows="10" style="height: 40px; width 100%; margin-bottom: 0.5rem;" placeholder="답글 작성" class="reply-write form-control" id="id_content" required></textarea>
-                          <input class="mzbtn-reply" type="submit" value="답글 게시">
+                        <p class="reply-show" onclick="reply_create_open(this)" id="reply-create-${ commentData[i].comment_id }" style="display:block;">답글 달기</p>
+                        <form action="" class="form-reply" id="form-reply-create-${ commentData[i].comment_id }" method="POST" data-mag-id="${ mzId }" data-com-id="${ commentData[i].comment_id }" style="margin-top: 2rem; display: none;">
+                          <textarea name="content" cols="40" rows="10" style="height: 40px; width: 100%; margin-bottom: 0.5rem;" placeholder="답글 작성" class="reply-write form-control" required id="id_content"></textarea>
+                          <div style="display: flex;">
+                            <input class="mzbtn-reply" onclick="reply_create(this)" id="reply-create-${ commentData[i].comment_id }" type="submit" value="답글 게시">
+                            <p class="mzbtn-cancel" onclick="reply_create_cancel(this)" id="reply-create-${ commentData[i].comment_id }">취소</p>
+                          </div>
                         </form>
                       </div>
                     </div>
@@ -461,17 +473,17 @@
             if (replyData[i][j].reply_user_id === user) {
               replies.insertAdjacentHTML('beforeend', `
               <div class="reply-info">
-                  <a href="/accounts/profile/${ replyData[i][j].reply_user }/" class="replies-user"><span style="margin-right:1rem">↳</span>${ replyData[i][j].reply_user }</a>
-                  <p class="replies-content"><span style="margin-right: 0.7rem;">|</span>${ replyData[i][j].reply_content }</p>
-                  <a href="/magazine/${ mzId }/${ commentData[i].comment_id }/reply_delete/${ replyData[i][j].reply_id }/" class="replies-delete">삭제하기</a>
+                <a href="/accounts/profile/${ replyData[i][j].reply_user }/" class="replies-user"><span style="margin-right:1rem">↳</span>${ replyData[i][j].reply_user }</a>
+                <p class="replies-content"><span style="margin-right: 0.7rem;">|</span>${ replyData[i][j].reply_content }</p>
+                <p class="replies-delete" id="replies-delete-${ replyData[i][j].reply_id }" onclick="reply_delete(this)" data-mag-id="${ mzId }" data-com-id="${ commentData[i].comment_id }" data-reply-id="${ replyData[i][j].reply_id }">삭제하기</p>
               </div>
-              `)
-            } else {
-              replies.insertAdjacentHTML('beforeend', `
-                <div class="reply-info">
-                  <a href="/accounts/profile/${ replyData[i][j].reply_user }/" class="replies-user"><span style="margin-right:1rem">↳</span>${ replyData[i][j].reply_user }</a>
-                  <p class="replies-content"><span style="margin-right: 0.7rem;">|</span>${ replyData[i][j].reply_content }</p>
-                </div>
+            `)
+          } else {
+            replies.insertAdjacentHTML('beforeend', `
+              <div class="reply-info">
+                <a href="/accounts/profile/${ replyData[i][j].reply_user }/" class="replies-user"><span style="margin-right:1rem">↳</span>${ replyData[i][j].reply_user }</a>
+                <p class="replies-content"><span style="margin-right: 0.7rem;">|</span>${ replyData[i][j].reply_content }</p>
+              </div>
                 `)
             }
           }
@@ -544,10 +556,13 @@
                     </div>
                     
                     <div class="reply">
-                      <p class="reply-show">답글 달기</p>
-                      <form action="/magazine/${ mzId }/reply_create/${ commentData[i].comment_id }/" method="POST" style="">
-                        <textarea name="content" cols="40" rows="10" style="height: 40px; width 100%; margin-bottom: 0.5rem;" placeholder="답글 작성" class="reply-write form-control" id="id_content" required></textarea>
-                        <input class="mzbtn-reply" type="submit" value="답글 게시">
+                      <p class="reply-show" onclick="reply_create_open(this)" id="reply-create-${ commentData[i].comment_id }" style="display:block;">답글 달기</p>
+                      <form action="" class="form-reply" id="form-reply-create-${ commentData[i].comment_id }" method="POST" data-mag-id="${ mzId }" data-com-id="${ commentData[i].comment_id }" style="margin-top: 2rem; display: none;">
+                        <textarea name="content" cols="40" rows="10" style="height: 40px; width: 100%; margin-bottom: 0.5rem;" placeholder="답글 작성" class="reply-write form-control" required id="id_content"></textarea>
+                        <div style="display: flex;">
+                          <input class="mzbtn-reply" onclick="reply_create(this)" id="reply-create-${ commentData[i].comment_id }" type="submit" value="답글 게시">
+                          <p class="mzbtn-cancel" onclick="reply_create_cancel(this)" id="reply-create-${ commentData[i].comment_id }">취소</p>
+                        </div>
                       </form>
                     </div>
                   </div>
@@ -592,10 +607,13 @@
                       </div>
                       
                       <div class="reply">
-                        <p class="reply-show">답글 달기</p>
-                        <form action="/magazine/${ mzId }/reply_create/${ commentData[i].comment_id }/" method="POST" style="">
-                          <textarea name="content" cols="40" rows="10" style="height: 40px; width 100%; margin-bottom: 0.5rem;" placeholder="답글 작성" class="reply-write form-control" id="id_content" required></textarea>
-                          <input class="mzbtn-reply" type="submit" value="답글 게시">
+                        <p class="reply-show" onclick="reply_create_open(this)" id="reply-create-${ commentData[i].comment_id }" style="display:block;">답글 달기</p>
+                        <form action="" class="form-reply" id="form-reply-create-${ commentData[i].comment_id }" method="POST" data-mag-id="${ mzId }" data-com-id="${ commentData[i].comment_id }" style="margin-top: 2rem; display: none;">
+                          <textarea name="content" cols="40" rows="10" style="height: 40px; width: 100%; margin-bottom: 0.5rem;" placeholder="답글 작성" class="reply-write form-control" required id="id_content"></textarea>
+                          <div style="display: flex;">
+                            <input class="mzbtn-reply" onclick="reply_create(this)" id="reply-create-${ commentData[i].comment_id }" type="submit" value="답글 게시">
+                            <p class="mzbtn-cancel" onclick="reply_create_cancel(this)" id="reply-create-${ commentData[i].comment_id }">취소</p>
+                          </div>
                         </form>
                       </div>
                     </div>
@@ -619,17 +637,17 @@
             if (replyData[i][j].reply_user_id === user) {
               replies.insertAdjacentHTML('beforeend', `
               <div class="reply-info">
-                  <a href="/accounts/profile/${ replyData[i][j].reply_user }/" class="replies-user"><span style="margin-right:1rem">↳</span>${ replyData[i][j].reply_user }</a>
-                  <p class="replies-content"><span style="margin-right: 0.7rem;">|</span>${ replyData[i][j].reply_content }</p>
-                  <a href="/magazine/${ mzId }/${ commentData[i].comment_id }/reply_delete/${ replyData[i][j].reply_id }/" class="replies-delete">삭제하기</a>
+                <a href="/accounts/profile/${ replyData[i][j].reply_user }/" class="replies-user"><span style="margin-right:1rem">↳</span>${ replyData[i][j].reply_user }</a>
+                <p class="replies-content"><span style="margin-right: 0.7rem;">|</span>${ replyData[i][j].reply_content }</p>
+                <p class="replies-delete" id="replies-delete-${ replyData[i][j].reply_id }" onclick="reply_delete(this)" data-mag-id="${ mzId }" data-com-id="${ commentData[i].comment_id }" data-reply-id="${ replyData[i][j].reply_id }">삭제하기</p>
               </div>
-              `)
-            } else {
-              replies.insertAdjacentHTML('beforeend', `
-                <div class="reply-info">
-                  <a href="/accounts/profile/${ replyData[i][j].reply_user }/" class="replies-user"><span style="margin-right:1rem">↳</span>${ replyData[i][j].reply_user }</a>
-                  <p class="replies-content"><span style="margin-right: 0.7rem;">|</span>${ replyData[i][j].reply_content }</p>
-                </div>
+            `)
+          } else {
+            replies.insertAdjacentHTML('beforeend', `
+              <div class="reply-info">
+                <a href="/accounts/profile/${ replyData[i][j].reply_user }/" class="replies-user"><span style="margin-right:1rem">↳</span>${ replyData[i][j].reply_user }</a>
+                <p class="replies-content"><span style="margin-right: 0.7rem;">|</span>${ replyData[i][j].reply_content }</p>
+              </div>
                 `)
             }
           }
@@ -687,34 +705,76 @@
     } 
   }
 
-  const replyForm = document.querySelector(".form-reply")
+  const reply_create = (e) => {
+    console.log(e.id)
+    const replyForm = document.querySelector(`#form-${ e.id }`)
 
-  replyForm.addEventListener('submit', function(event) {
-    console.log(event.target.dataset.magId)
-    event.preventDefault();
-    axios ({
-      method : 'post',
-      url : `/magazine/${ event.target.dataset.magId }/reply_create/${ event.target.dataset.comId }/`,
+    replyForm.addEventListener('submit', function(event) {
+      console.log(event.target.dataset.magId)
+      event.preventDefault();
+      axios ({
+        method : 'post',
+        url : `/magazine/${ event.target.dataset.magId }/reply_create/${ event.target.dataset.comId }/`,
+        headers: {
+          'X-CSRFToken': csrftoken
+        },
+        data: new FormData(replyForm)
+      }).then(response => {
+
+        const replyData = response.data.replyData
+        const mzId = response.data.mzId
+        const commentId = response.data.comment
+        const user = response.data.user
+
+        const replies = document.querySelector(`.replies-${ commentId }`)
+        replies.textContent = ""
+
+        for (let j = 0 ; j < replyData.length ; j++) {
+          
+          // 대댓글을 단 사람이랑 현재 로그인을 한 사람의 pk가 동일할 때
+          if (replyData[j].reply_user_id === user) {
+            replies.insertAdjacentHTML('beforeend', `
+            <div class="reply-info">
+                <a href="/accounts/profile/${ replyData[j].reply_user }/" class="replies-user"><span style="margin-right:1rem">↳</span>${ replyData[j].reply_user }</a>
+                <p class="replies-content"><span style="margin-right: 0.7rem;">|</span>${ replyData[j].reply_content }</p>
+                <p class="replies-delete" id="replies-delete-${ replyData[j].reply_id }" onclick="reply_delete(this)" data-mag-id="${ mzId }" data-com-id="${ commentId }" data-reply-id="${ replyData[j].reply_id }">삭제하기</p>
+            </div>
+            `)
+          } else {
+            replies.insertAdjacentHTML('beforeend', `
+              <div class="reply-info">
+                <a href="/accounts/profile/${ replyData[j].reply_user }/" class="replies-user"><span style="margin-right:1rem">↳</span>${ replyData[j].reply_user }</a>
+                <p class="replies-content"><span style="margin-right: 0.7rem;">|</span>${ replyData[j].reply_content }</p>
+              </div>
+              `)
+          }
+        }
+
+      })
+      replyForm.reset()
+    })
+  }
+
+  const reply_delete = (e) => {
+
+    const replyDelete = document.querySelector(`#${ e.id }`)
+
+    axios({
+      method: 'get',
+      url: `/magazine/${ event.target.dataset.magId }/${ event.target.dataset.comId }/reply_delete/${ event.target.dataset.replyId }/`,
       headers: {
         'X-CSRFToken': csrftoken
       },
-      data: new FormData(replyForm)
-    }).then(response => {
-
+    }) .then(response => {
       const replyData = response.data.replyData
       const mzId = response.data.mzId
       const commentId = response.data.comment
       const user = response.data.user
 
-
-      const replies = document.querySelector('.replies')
+      const replies = document.querySelector(`.replies-${ commentId }`)
       replies.textContent = ""
-      console.log(replies)
-
 
       for (let j = 0 ; j < replyData.length ; j++) {
-
-        console.log(replyData[j].reply_comment_id)
         
         // 대댓글을 단 사람이랑 현재 로그인을 한 사람의 pk가 동일할 때
         if (replyData[j].reply_user_id === user) {
@@ -722,7 +782,7 @@
           <div class="reply-info">
               <a href="/accounts/profile/${ replyData[j].reply_user }/" class="replies-user"><span style="margin-right:1rem">↳</span>${ replyData[j].reply_user }</a>
               <p class="replies-content"><span style="margin-right: 0.7rem;">|</span>${ replyData[j].reply_content }</p>
-              <a href="/magazine/${ mzId }/${ commentId }/reply_delete/${ replyData[j].reply_id }/" class="replies-delete">삭제하기</a>
+              <p class="replies-delete" id="replies-delete-${ replyData[j].reply_id }" onclick="reply_delete(this)" data-mag-id="${ mzId }" data-com-id="${ commentId }" data-reply-id="${ replyData[j].reply_id }">삭제하기</p>
           </div>
           `)
         } else {
@@ -734,12 +794,9 @@
             `)
         }
       }
-
     })
-    replyForm.reset()
-  })
 
-
+  }
 
   </script>
 {% endblock script %}
