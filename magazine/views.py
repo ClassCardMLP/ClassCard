@@ -303,6 +303,7 @@ def mzcomment_update(request, mz_pk, mzcm_pk):
 def reply_create(request, mz_pk, mzcm_pk):
     magazine = Magazine.objects.get(pk=mz_pk)
     mzcomment = Comment.objects.get(pk=mzcm_pk)
+    comment = mzcomment.id
     user = request.user.pk
 
     if request.method == "POST":
@@ -314,7 +315,30 @@ def reply_create(request, mz_pk, mzcm_pk):
             mzreply_form.user = request.user
             mzreply_form.save()
 
-        return redirect('magazine:detail', magazine.pk)
+    replies = Reply.objects.filter(comment_id = mzcm_pk)
+
+    reply_data = []
+
+    for reply in replies:
+
+        reply_data.append({
+            "reply_id" : reply.id,
+            "reply_user_id" : reply.user.id,
+            "reply_comment_id" : reply.comment.id,
+            "reply_user" : reply.user.username,
+            "reply_content" : reply.content,
+            "reply_created" : reply.created_at,
+        })
+        
+
+    data = {
+        "replyData" : reply_data,
+        "user": user,
+        "comment" : comment,
+        "mzId": magazine.pk,
+    }  
+
+    return JsonResponse(data)
 
 def reply_delete(request, mz_pk, mzcm_pk, mzreply_pk):
     magazine = Magazine.objects.get(pk=mz_pk)

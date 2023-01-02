@@ -107,11 +107,14 @@
                 </div>
                 
                 <div class="reply">
-                  <p class="reply-show">답글 달기</p>
-                  <form action="{% url 'magazine:reply_create' magazine.pk comment.pk %}" method="POST" style="">
+                  <p class="reply-show" onclick="reply_create_open(this)" id="reply-{{ comment.pk }}" style="display:block;">답글 달기</p>
+                  <form action="" class="form-reply" id="form-reply-{{ comment.pk }}" method="POST" data-mag-id="{{ magazine.pk }}" data-com-id="{{ comment.pk }}" style="margin-top: 2rem; display: none;">
                     {% csrf_token %}
                     {% render_field reply_comment.content class="reply-write form-control" placeholder='답글 작성' style='height: 40px; width: 100%; margin-bottom: 0.5rem;' %}
-                    <input class="mzbtn-reply" type="submit" value="답글 게시">
+                    <div style="display: flex;">
+                      <input class="mzbtn-reply" type="submit" value="답글 게시">
+                      <p class="mzbtn-cancel" onclick="reply_create_cancel(this)" id="reply-{{ comment.pk }}">취소</p>
+                    </div>
                   </form>
                 </div>
               </div>
@@ -119,7 +122,7 @@
             </div>
 
             {% if request.user == comment.user %}
-            <form class="mzcomment-update-form form-comment-update-{{ comment.pk }}" id="form-comment-update-okBtn-{{ comment.pk }}" action="{% url 'card:comment_update' magazine.id comment.pk %}" method="post" style="display:none">
+            <form class="mzcomment-update-form form-comment-update-{{ comment.pk }}" id="form-comment-update-okBtn-{{ comment.pk }}" action="{% url 'card:comment_update' magazine.id comment.pk %}" method="post" style="display:none;">
               {% csrf_token %}
               <div class="mzcomment-update-form-style">
                 <select class="mzcomment-update-rate" id="comment-update-rate-{{ comment.pk }}" value="{{ comment.grade }}">
@@ -166,7 +169,8 @@
       })
     })
 
-      // 댓글 생성 비동기
+
+  // 댓글 생성 비동기
   const commentForm = document.querySelector('.mzdetail-comment-form') 
   const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value
 
@@ -187,6 +191,8 @@
       const user = response.data.user
       const mzId = response.data.mzId
       const replyData = response.data.replyData
+
+      console.log(comments)
 
       for (let i = 0 ; i < commentData.length; i++) {
 
@@ -223,7 +229,7 @@
                 <p class="mzdetail-comment-time">${ commentData[i].create }</p>
 
                 <div class="reply-box">
-                  <div class="replies-${ i }">
+                  <div class="replies-${ commentData[i].comment_id }">
                   </div>
                   
                   <div class="reply">
@@ -271,7 +277,7 @@
                   <p class="mzdetail-comment-time">${ commentData[i].create }</p>
 
                   <div class="reply-box">
-                    <div class="replies-${ i }">
+                    <div class="replies-${ commentData[i].comment_id }">
                     </div>
                     
                     <div class="reply">
@@ -291,14 +297,13 @@
           )
         }
 
-        const replies = document.querySelector(`.replies-${ i }`)
+        const replies = document.querySelector(`.replies-${ commentData[i].comment_id }`)
         replies.textContent = ""
+        console.log(replies)
 
         if (replyData[i].length > 0) {
 
           for (let j = 0 ; j < replyData[i].length ; j++) {
-
-            console.log(replyData[i][j].reply_content)
             
             // 대댓글을 단 사람이랑 현재 로그인을 한 사람의 pk가 동일할 때
             if (replyData[i][j].reply_user_id === user) {
@@ -306,7 +311,7 @@
               <div class="reply-info">
                   <a href="/accounts/profile/${ replyData[i][j].reply_user }/" class="replies-user"><span style="margin-right:1rem">↳</span>${ replyData[i][j].reply_user }</a>
                   <p class="replies-content"><span style="margin-right: 0.7rem;">|</span>${ replyData[i][j].reply_content }</p>
-                  <a href="/magazine/${ mzId }/${ commentData[i].comment_id }/reply_delete/${ replyData[i][j].reply_comment_id }/" class="replies-delete">삭제하기</a>
+                  <a href="/magazine/${ mzId }/${ commentData[i].comment_id }/reply_delete/${ replyData[i][j].reply_id }/" class="replies-delete">삭제하기</a>
               </div>
               `)
             } else {
@@ -327,7 +332,6 @@
 
   // 댓글 삭제 비동기
   const comment_delete = (e) => {
-    console.log(e.id)
     const comment_id = document.querySelector(`#${e.id}`).id
 
     axios({
@@ -337,7 +341,6 @@
         'X-CSRFToken': csrftoken
       }
     }) .then(response => {
-      console.log(response.data)
       const comments = document.querySelector(".mzdetail-comment-box")
       comments.textContent= ""
       const commentData = response.data.commentData
@@ -379,7 +382,7 @@
                   <p class="mzdetail-comment-time">${ commentData[i].create }</p>
   
                   <div class="reply-box">
-                    <div class="replies-${ i }">
+                    <div class="replies-${ commentData[i].comment_id }">
                     </div>
                     
                     <div class="reply">
@@ -427,7 +430,7 @@
                     <p class="mzdetail-comment-time">${ commentData[i].create }</p>
   
                     <div class="reply-box">
-                      <div class="replies-${ i }">
+                      <div class="replies-${ commentData[i].comment_id }">
                       </div>
                       
                       <div class="reply">
@@ -447,14 +450,12 @@
           )
         }
 
-        const replies = document.querySelector(`.replies-${ i }`)
+        const replies = document.querySelector(`.replies-${ commentData[i].comment_id }`)
         replies.textContent = ""
 
         if (replyData[i].length > 0) {
 
           for (let j = 0 ; j < replyData[i].length ; j++) {
-
-            console.log(replyData[i][j].reply_content)
             
             // 대댓글을 단 사람이랑 현재 로그인을 한 사람의 pk가 동일할 때
             if (replyData[i][j].reply_user_id === user) {
@@ -462,7 +463,7 @@
               <div class="reply-info">
                   <a href="/accounts/profile/${ replyData[i][j].reply_user }/" class="replies-user"><span style="margin-right:1rem">↳</span>${ replyData[i][j].reply_user }</a>
                   <p class="replies-content"><span style="margin-right: 0.7rem;">|</span>${ replyData[i][j].reply_content }</p>
-                  <a href="/magazine/${ mzId }/${ commentData[i].comment_id }/reply_delete/${ replyData[i][j].reply_comment_id }/" class="replies-delete">삭제하기</a>
+                  <a href="/magazine/${ mzId }/${ commentData[i].comment_id }/reply_delete/${ replyData[i][j].reply_id }/" class="replies-delete">삭제하기</a>
               </div>
               `)
             } else {
@@ -508,7 +509,6 @@
 
         let grade = commentData[i].grade
 
-        console.log(grade)
 
         if (grade === '1') {
           grade = '⭐'
@@ -540,7 +540,7 @@
                   <p class="mzdetail-comment-time">${ commentData[i].create }</p>
   
                   <div class="reply-box">
-                    <div class="replies-${ i }">
+                    <div class="replies-${ commentData[i].comment_id }">
                     </div>
                     
                     <div class="reply">
@@ -588,7 +588,7 @@
                     <p class="mzdetail-comment-time">${ commentData[i].create }</p>
   
                     <div class="reply-box">
-                      <div class="replies-${ i }">
+                      <div class="replies-${ commentData[i].comment_id }">
                       </div>
                       
                       <div class="reply">
@@ -608,14 +608,12 @@
           )
         }
 
-        const replies = document.querySelector(`.replies-${ i }`)
+        const replies = document.querySelector(`.replies-${ commentData[i].comment_id }`)
         replies.textContent = ""
 
         if (replyData[i].length > 0) {
 
           for (let j = 0 ; j < replyData[i].length ; j++) {
-
-            console.log(replyData[i][j].reply_content)
             
             // 대댓글을 단 사람이랑 현재 로그인을 한 사람의 pk가 동일할 때
             if (replyData[i][j].reply_user_id === user) {
@@ -623,7 +621,7 @@
               <div class="reply-info">
                   <a href="/accounts/profile/${ replyData[i][j].reply_user }/" class="replies-user"><span style="margin-right:1rem">↳</span>${ replyData[i][j].reply_user }</a>
                   <p class="replies-content"><span style="margin-right: 0.7rem;">|</span>${ replyData[i][j].reply_content }</p>
-                  <a href="/magazine/${ mzId }/${ commentData[i].comment_id }/reply_delete/${ replyData[i][j].reply_comment_id }/" class="replies-delete">삭제하기</a>
+                  <a href="/magazine/${ mzId }/${ commentData[i].comment_id }/reply_delete/${ replyData[i][j].reply_id }/" class="replies-delete">삭제하기</a>
               </div>
               `)
             } else {
@@ -666,5 +664,82 @@
     commentUpdateForm.style.display = 'none'
     commentForm.style.display = 'block'
   }
+
+
+  //-------------- 대댓글 비동기 -------------------------
+  const reply_create_open = (e) => {
+    const replyForm = document.querySelector(`#form-${ e.id }`)
+    const replyOpenBtn = document.querySelector(`#${ e.id }`)
+
+    if (replyForm.style.display === "none") {
+      replyForm.style.display = 'block'
+      replyOpenBtn.style.display = 'none'
+    }
+  }
+
+  const reply_create_cancel = (e) => {
+    const replyForm = document.querySelector(`#form-${ e.id }`)
+    const replyOpenBtn = document.querySelector(`#${ e.id }`)
+    
+    if (replyForm.style.display === "block") {
+      replyForm.style.display = 'none'
+      replyOpenBtn.style.display = 'block'
+    } 
+  }
+
+  const replyForm = document.querySelector(".form-reply")
+
+  replyForm.addEventListener('submit', function(event) {
+    console.log(event.target.dataset.magId)
+    event.preventDefault();
+    axios ({
+      method : 'post',
+      url : `/magazine/${ event.target.dataset.magId }/reply_create/${ event.target.dataset.comId }/`,
+      headers: {
+        'X-CSRFToken': csrftoken
+      },
+      data: new FormData(replyForm)
+    }).then(response => {
+
+      const replyData = response.data.replyData
+      const mzId = response.data.mzId
+      const commentId = response.data.comment
+      const user = response.data.user
+
+
+      const replies = document.querySelector('.replies')
+      replies.textContent = ""
+      console.log(replies)
+
+
+      for (let j = 0 ; j < replyData.length ; j++) {
+
+        console.log(replyData[j].reply_comment_id)
+        
+        // 대댓글을 단 사람이랑 현재 로그인을 한 사람의 pk가 동일할 때
+        if (replyData[j].reply_user_id === user) {
+          replies.insertAdjacentHTML('beforeend', `
+          <div class="reply-info">
+              <a href="/accounts/profile/${ replyData[j].reply_user }/" class="replies-user"><span style="margin-right:1rem">↳</span>${ replyData[j].reply_user }</a>
+              <p class="replies-content"><span style="margin-right: 0.7rem;">|</span>${ replyData[j].reply_content }</p>
+              <a href="/magazine/${ mzId }/${ commentId }/reply_delete/${ replyData[j].reply_id }/" class="replies-delete">삭제하기</a>
+          </div>
+          `)
+        } else {
+          replies.insertAdjacentHTML('beforeend', `
+            <div class="reply-info">
+              <a href="/accounts/profile/${ replyData[j].reply_user }/" class="replies-user"><span style="margin-right:1rem">↳</span>${ replyData[j].reply_user }</a>
+              <p class="replies-content"><span style="margin-right: 0.7rem;">|</span>${ replyData[j].reply_content }</p>
+            </div>
+            `)
+        }
+      }
+
+    })
+    replyForm.reset()
+  })
+
+
+
   </script>
 {% endblock script %}

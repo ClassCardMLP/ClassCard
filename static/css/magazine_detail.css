@@ -129,21 +129,30 @@
 }
 
 /* 대댓글 */
+.mzbtn-cancel,
 .mzbtn-reply{
   border-radius: 30px;
   background-color: #ffffff00;
   border: 0px;
+  font-size : 14px; 
   color: white;
 }
 
+.mzbtn-cancel:hover,
 .mzbtn-reply:hover{
   color: #6a717b;
   cursor: pointer;
 }
 
+
+.mzbtn-cancel {
+  margin-bottom: 0;
+  margin-left: 1rem;
+}
+
 .reply-show{
   margin-bottom: 0;
-  font-size: 12px;
+  font-size: 14px;
   color: white;
 }
 
