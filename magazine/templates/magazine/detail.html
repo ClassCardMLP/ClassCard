@@ -6,6 +6,7 @@
 {% block css %}
   <link rel="stylesheet" href="{% static 'css/magazine.css' %}">
   <link rel="stylesheet" href="{% static 'css/magazine_detail.css' %}">
+  
 {% endblock css %}
 
 {% block body %}
@@ -57,7 +58,7 @@
 <div style='padding-bottom:5rem; background-color: #ebebeb;'>
   <div class="mzdetail-comment-create container">
     <p class="mzdetail-comment-title">댓글 작성</p>
-    <form action="{% url 'magazine:mzcomment_create' magazine.pk %}" method="POST" class="mzdetail-comment-form" data-mag-id="{{ magazine.pk }}">
+    <form action="" method="POST" class="mzdetail-comment-form" data-mag-id="{{ magazine.pk }}">
       <div class="mzdetail-comment-input-box">
         {% csrf_token %}
         <div>
@@ -91,9 +92,37 @@
               <p class="mzdetail-comment-rate">{{ comment.get_grade_display }}</p>
               <p class="mzdetail-comment-content">{{ comment.content }}</p>
               <p class="mzdetail-comment-time">{{ comment.created_at }}</p>
+              
+              <div class="reply-box">
+                <div class="replies-{{ comment.pk }}">
+                {% for reply in comment.reply_set.all %}
+                  <div class="reply-info">
+                    <a href="{% url 'accounts:profile' reply.user.username %}" class="replies-user"><span style="margin-right:1rem">↳</span>{{ reply.user }}</a>
+                    <p class="replies-content"><span style="margin-right: 0.7rem;">|</span>{{ reply.content }}</p>
+                    {% if request.user == reply.user %}
+                    <p class="replies-delete" id="replies-delete-{{ reply.id }}" onclick="reply_delete(this)" data-mag-id="{{ magazine.id }}" data-com-id="{{ comment.pk }}" data-reply-id="{{ reply.id }}">삭제하기</p>
+                    {% endif %}
+                  </div>
+                {% endfor %}
+                </div>
+                
+                <div class="reply">
+                  <p class="reply-show" onclick="reply_create_open(this)" id="reply-create-{{ comment.pk }}" style="display:block;">답글 달기</p>
+                  <form action="" class="form-reply" id="form-reply-create-{{ comment.pk }}" method="POST" data-mag-id="{{ magazine.pk }}" data-com-id="{{ comment.pk }}" style="margin-top: 2rem; display: none;">
+                    {% csrf_token %}
+                    {% render_field reply_comment.content class="reply-write form-control" placeholder='답글 작성' style='height: 40px; width: 100%; margin-bottom: 0.5rem;' %}
+                    <div style="display: flex;">
+                      <input class="mzbtn-reply" onclick="reply_create(this)" id="reply-create-{{ comment.pk }}" type="submit" value="답글 게시">
+                      <p class="mzbtn-cancel" onclick="reply_create_cancel(this)" id="reply-create-{{ comment.pk }}">취소</p>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            
             </div>
+
             {% if request.user == comment.user %}
-            <form class="mzcomment-update-form form-comment-update-{{ comment.pk }}" id="form-comment-update-okBtn-{{ comment.pk }}" action="{% url 'card:comment_update' magazine.id comment.pk %}" method="post" style="display:none">
+            <form class="mzcomment-update-form form-comment-update-{{ comment.pk }}" id="form-comment-update-okBtn-{{ comment.pk }}" action="{% url 'card:comment_update' magazine.id comment.pk %}" method="post" style="display:none;">
               {% csrf_token %}
               <div class="mzcomment-update-form-style">
                 <select class="mzcomment-update-rate" id="comment-update-rate-{{ comment.pk }}" value="{{ comment.grade }}">
@@ -140,7 +169,8 @@
       })
     })
 
-      // 댓글 생성 비동기
+
+  // 댓글 생성 비동기
   const commentForm = document.querySelector('.mzdetail-comment-form') 
   const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value
 
@@ -160,8 +190,11 @@
       const commentData = response.data.commentData
       const user = response.data.user
       const mzId = response.data.mzId
+      const replyData = response.data.replyData
 
-      for (i = 0 ; i < commentData.length; i++) {
+      console.log(comments)
+
+      for (let i = 0 ; i < commentData.length; i++) {
 
         let grade = commentData[i].grade
 
@@ -194,8 +227,25 @@
                 <p class="mzdetail-comment-rate">${ grade }</p>
                 <p class="mzdetail-comment-content">${ commentData[i].content }</p>
                 <p class="mzdetail-comment-time">${ commentData[i].create }</p>
+
+                <div class="reply-box">
+                  <div class="replies-${ commentData[i].comment_id }">
+                  </div>
+                  
+                  <div class="reply">
+                    <p class="reply-show" onclick="reply_create_open(this)" id="reply-create-${ commentData[i].comment_id }" style="display:block;">답글 달기</p>
+                    <form action="" class="form-reply" id="form-reply-create-${ commentData[i].comment_id }" method="POST" data-mag-id="${ mzId }" data-com-id="${ commentData[i].comment_id }" style="margin-top: 2rem; display: none;">
+                      <textarea name="content" cols="40" rows="10" style="height: 40px; width: 100%; margin-bottom: 0.5rem;" placeholder="답글 작성" class="reply-write form-control" required id="id_content"></textarea>
+                      <div style="display: flex;">
+                        <input class="mzbtn-reply" onclick="reply_create(this)" id="reply-create-${ commentData[i].comment_id }" type="submit" value="답글 게시">
+                        <p class="mzbtn-cancel" onclick="reply_create_cancel(this)" id="reply-create-${ commentData[i].comment_id }">취소</p>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+
               </div>
-              <form class="mzcomment-update-form form-comment-update-${ commentData[i].comment_id }" id="form-comment-update-okBtn-${ commentData[i].comment_id }" action="/card/comment_update/${ mzId }/${ commentData[i].comment_id }/" method="post" style="display:none">
+              <form class="mzcomment-update-form form-comment-update-${ commentData[i].comment_id }" id="form-comment-update-okBtn-${ commentData[i].comment_id }" action="/magazine/${ mzId }/mzcomment_update/${ commentData[i].comment_id }/" method="post" style="display:none">
                 <div class="mzcomment-update-form-style">
                   <select class="mzcomment-update-rate" id="comment-update-rate-${ commentData[i].comment_id }" value="${ commentData[i].grade }">
                     <option selected value="${ commentData[i].grade }">${grade}</option>
@@ -228,6 +278,23 @@
                   <p class="mzdetail-comment-rate">${ grade }</p>
                   <p class="mzdetail-comment-content">${ commentData[i].content }</p>
                   <p class="mzdetail-comment-time">${ commentData[i].create }</p>
+
+                  <div class="reply-box">
+                    <div class="replies-${ commentData[i].comment_id }">
+                    </div>
+                    
+                    <div class="reply">
+                      <p class="reply-show" onclick="reply_create_open(this)" id="reply-create-${ commentData[i].comment_id }" style="display:block;">답글 달기</p>
+                      <form action="" class="form-reply" id="form-reply-create-${ commentData[i].comment_id }" method="POST" data-mag-id="${ mzId }" data-com-id="${ commentData[i].comment_id }" style="margin-top: 2rem; display: none;">
+                        <textarea name="content" cols="40" rows="10" style="height: 40px; width: 100%; margin-bottom: 0.5rem;" placeholder="답글 작성" class="reply-write form-control" required id="id_content"></textarea>
+                        <div style="display: flex;">
+                          <input class="mzbtn-reply" onclick="reply_create(this)" id="reply-create-${ commentData[i].comment_id }" type="submit" value="답글 게시">
+                          <p class="mzbtn-cancel" onclick="reply_create_cancel(this)" id="reply-create-${ commentData[i].comment_id }">취소</p>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+
                 </div>
               </div>
             </div>
@@ -235,6 +302,35 @@
           `
           )
         }
+
+        const replies = document.querySelector(`.replies-${ commentData[i].comment_id }`)
+        replies.textContent = ""
+        console.log(replies)
+
+        if (replyData[i].length > 0) {
+
+          for (let j = 0 ; j < replyData[i].length ; j++) {
+            
+            // 대댓글을 단 사람이랑 현재 로그인을 한 사람의 pk가 동일할 때
+            if (replyData[i][j].reply_user_id === user) {
+              replies.insertAdjacentHTML('beforeend', `
+              <div class="reply-info">
+                <a href="/accounts/profile/${ replyData[i][j].reply_user }/" class="replies-user"><span style="margin-right:1rem">↳</span>${ replyData[i][j].reply_user }</a>
+                <p class="replies-content"><span style="margin-right: 0.7rem;">|</span>${ replyData[i][j].reply_content }</p>
+                <p class="replies-delete" id="replies-delete-${ replyData[i][j].reply_id }" onclick="reply_delete(this)" data-mag-id="${ mzId }" data-com-id="${ commentData[i].comment_id }" data-reply-id="${ replyData[i][j].reply_id }">삭제하기</p>
+              </div>
+            `)
+          } else {
+            replies.insertAdjacentHTML('beforeend', `
+              <div class="reply-info">
+                <a href="/accounts/profile/${ replyData[i][j].reply_user }/" class="replies-user"><span style="margin-right:1rem">↳</span>${ replyData[i][j].reply_user }</a>
+                <p class="replies-content"><span style="margin-right: 0.7rem;">|</span>${ replyData[i][j].reply_content }</p>
+              </div>
+                `)
+            }
+          }
+        }
+
       }
     })
     commentForm.reset()
@@ -242,7 +338,6 @@
 
   // 댓글 삭제 비동기
   const comment_delete = (e) => {
-    console.log(e.id)
     const comment_id = document.querySelector(`#${e.id}`).id
 
     axios({
@@ -252,14 +347,14 @@
         'X-CSRFToken': csrftoken
       }
     }) .then(response => {
-      console.log(response.data)
       const comments = document.querySelector(".mzdetail-comment-box")
       comments.textContent= ""
       const commentData = response.data.commentData
       const user = response.data.user
       const mzId = response.data.mzId
+      const replyData = response.data.replyData
 
-      for (i = 0 ; i < commentData.length; i++) {
+      for (let i = 0 ; i < commentData.length; i++) {
 
         let grade = commentData[i].grade
 
@@ -276,62 +371,124 @@
         }
 
         if (user === commentData[i].user_id) {
-        comments.insertAdjacentHTML('beforeend', `
-        <div class="mzdetail-comment">
-          <div class="mzdetail-comment-detail">
-            <div class="d-flex flex-column">
-              <a href="/accounts/profile/${commentData[i].userName}/" class="mzdetail-comment-user">${ commentData[i].userName }</a>
-              <div style="margin-top:10px; display:flex">
-                <p class="mzdetail-comment-update" onclick="comment_update(this)" id="okBtn-${ commentData[i].comment_id }" data-magup-id="${ mzId }" data-commentup-id="${ commentData[i].comment_id }">수정</p>
-                <p class="mzdetail-comment-delete" onclick="comment_delete(this)" id="comment-delete-${ commentData[i].comment_id }" data-magdel-id="${ mzId }" data-commentdel-id="${ commentData[i].comment_id }" style="margin-left: 1.5rem;">삭제</p>
-              </div>
-            </div>
-            <div class="mzdetail-comment-review">
-              <div class="mzdetail-comment-review-okBtn-${ commentData[i].comment_id } review-comment-update-${ commentData[i].comment_id }" style="display:block;">
-                <p class="mzdetail-comment-rate">${ grade }</p>
-                <p class="mzdetail-comment-content">${ commentData[i].content }</p>
-                <p class="mzdetail-comment-time">${ commentData[i].create }</p>
-              </div>
-              <form class="mzcomment-update-form form-comment-update-${ commentData[i].comment_id }" id="form-comment-update-okBtn-${ commentData[i].comment_id }" action="/card/comment_update/${ mzId }/${ commentData[i].comment_id }/" method="post" style="display:none">
-                <div class="mzcomment-update-form-style">
-                  <select class="mzcomment-update-rate" id="comment-update-rate-${ commentData[i].comment_id }" value="${ commentData[i].grade }">
-                    <option selected value="${ commentData[i].grade }">${grade}</option>
-                    <option value="1">⭐</option>
-                    <option value="2">⭐⭐</option>
-                    <option value="3">⭐⭐⭐</option>
-                    <option value="4">⭐⭐⭐⭐</option>
-                    <option value="5">⭐⭐⭐⭐⭐</option>
-                  </select>
-                  <input class="mzcomment-update-content" id="comment-update-input-${ commentData[i].comment_id }" type="text" value="${ commentData[i].content }">
-                  <div class="d-flex">
-                    <p class="mzcomment-control-update" onclick="comment_update_ok(this)" id="comment-update-ok-${ commentData[i].comment_id }" data-magup-id="${ mzId }" data-commentup-id="${ commentData[i].comment_id }">수정 완료</p>
-                    <p class="mzcomment-control-update-exit ms-3" onclick="comment_update_exit(this)" id="comment-update-${ commentData[i].comment_id }">취소</p>
-                  </div>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-        `
-        )} else {
           comments.insertAdjacentHTML('beforeend', `
           <div class="mzdetail-comment">
             <div class="mzdetail-comment-detail">
               <div class="d-flex flex-column">
                 <a href="/accounts/profile/${commentData[i].userName}/" class="mzdetail-comment-user">${ commentData[i].userName }</a>
+                <div style="margin-top:10px; display:flex">
+                  <p class="mzdetail-comment-update" onclick="comment_update(this)" id="okBtn-${ commentData[i].comment_id }" data-magup-id="${ mzId }" data-commentup-id="${ commentData[i].comment_id }">수정</p>
+                  <p class="mzdetail-comment-delete" onclick="comment_delete(this)" id="comment-delete-${ commentData[i].comment_id }" data-magdel-id="${ mzId }" data-commentdel-id="${ commentData[i].comment_id }" style="margin-left: 1.5rem;">삭제</p>
+                </div>
               </div>
               <div class="mzdetail-comment-review">
                 <div class="mzdetail-comment-review-okBtn-${ commentData[i].comment_id } review-comment-update-${ commentData[i].comment_id }" style="display:block;">
                   <p class="mzdetail-comment-rate">${ grade }</p>
                   <p class="mzdetail-comment-content">${ commentData[i].content }</p>
                   <p class="mzdetail-comment-time">${ commentData[i].create }</p>
+  
+                  <div class="reply-box">
+                    <div class="replies-${ commentData[i].comment_id }">
+                    </div>
+                    
+                    <div class="reply">
+                      <p class="reply-show" onclick="reply_create_open(this)" id="reply-create-${ commentData[i].comment_id }" style="display:block;">답글 달기</p>
+                      <form action="" class="form-reply" id="form-reply-create-${ commentData[i].comment_id }" method="POST" data-mag-id="${ mzId }" data-com-id="${ commentData[i].comment_id }" style="margin-top: 2rem; display: none;">
+                        <textarea name="content" cols="40" rows="10" style="height: 40px; width: 100%; margin-bottom: 0.5rem;" placeholder="답글 작성" class="reply-write form-control" required id="id_content"></textarea>
+                        <div style="display: flex;">
+                          <input class="mzbtn-reply" onclick="reply_create(this)" id="reply-create-${ commentData[i].comment_id }" type="submit" value="답글 게시">
+                          <p class="mzbtn-cancel" onclick="reply_create_cancel(this)" id="reply-create-${ commentData[i].comment_id }">취소</p>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+  
                 </div>
+                <form class="mzcomment-update-form form-comment-update-${ commentData[i].comment_id }" id="form-comment-update-okBtn-${ commentData[i].comment_id }" action="/magazine/${ mzId }/mzcomment_update/${ commentData[i].comment_id }/" method="post" style="display:none">
+                  <div class="mzcomment-update-form-style">
+                    <select class="mzcomment-update-rate" id="comment-update-rate-${ commentData[i].comment_id }" value="${ commentData[i].grade }">
+                      <option selected value="${ commentData[i].grade }">${grade}</option>
+                      <option value="1">⭐</option>
+                      <option value="2">⭐⭐</option>
+                      <option value="3">⭐⭐⭐</option>
+                      <option value="4">⭐⭐⭐⭐</option>
+                      <option value="5">⭐⭐⭐⭐⭐</option>
+                    </select>
+                    <input class="mzcomment-update-content" id="comment-update-input-${ commentData[i].comment_id }" type="text" value="${ commentData[i].content }">
+                    <div class="d-flex">
+                      <p class="mzcomment-control-update" onclick="comment_update_ok(this)" id="comment-update-ok-${ commentData[i].comment_id }" data-magup-id="${ mzId }" data-commentup-id="${ commentData[i].comment_id }">수정 완료</p>
+                      <p class="mzcomment-control-update-exit ms-3" onclick="comment_update_exit(this)" id="comment-update-${ commentData[i].comment_id }">취소</p>
+                    </div>
+                  </div>
+                </form>
               </div>
             </div>
           </div>
           `
+          )} else {
+            comments.insertAdjacentHTML('beforeend', `
+            <div class="mzdetail-comment">
+              <div class="mzdetail-comment-detail">
+                <div class="d-flex flex-column">
+                  <a href="/accounts/profile/${commentData[i].userName}/" class="mzdetail-comment-user">${ commentData[i].userName }</a>
+                </div>
+                <div class="mzdetail-comment-review">
+                  <div class="mzdetail-comment-review-okBtn-${ commentData[i].comment_id } review-comment-update-${ commentData[i].comment_id }" style="display:block;">
+                    <p class="mzdetail-comment-rate">${ grade }</p>
+                    <p class="mzdetail-comment-content">${ commentData[i].content }</p>
+                    <p class="mzdetail-comment-time">${ commentData[i].create }</p>
+  
+                    <div class="reply-box">
+                      <div class="replies-${ commentData[i].comment_id }">
+                      </div>
+                      
+                      <div class="reply">
+                        <p class="reply-show" onclick="reply_create_open(this)" id="reply-create-${ commentData[i].comment_id }" style="display:block;">답글 달기</p>
+                        <form action="" class="form-reply" id="form-reply-create-${ commentData[i].comment_id }" method="POST" data-mag-id="${ mzId }" data-com-id="${ commentData[i].comment_id }" style="margin-top: 2rem; display: none;">
+                          <textarea name="content" cols="40" rows="10" style="height: 40px; width: 100%; margin-bottom: 0.5rem;" placeholder="답글 작성" class="reply-write form-control" required id="id_content"></textarea>
+                          <div style="display: flex;">
+                            <input class="mzbtn-reply" onclick="reply_create(this)" id="reply-create-${ commentData[i].comment_id }" type="submit" value="답글 게시">
+                            <p class="mzbtn-cancel" onclick="reply_create_cancel(this)" id="reply-create-${ commentData[i].comment_id }">취소</p>
+                          </div>
+                        </form>
+                      </div>
+                    </div>
+  
+                  </div>
+                </div>
+              </div>
+            </div>
+            `
           )
         }
+
+        const replies = document.querySelector(`.replies-${ commentData[i].comment_id }`)
+        replies.textContent = ""
+
+        if (replyData[i].length > 0) {
+
+          for (let j = 0 ; j < replyData[i].length ; j++) {
+            
+            // 대댓글을 단 사람이랑 현재 로그인을 한 사람의 pk가 동일할 때
+            if (replyData[i][j].reply_user_id === user) {
+              replies.insertAdjacentHTML('beforeend', `
+              <div class="reply-info">
+                <a href="/accounts/profile/${ replyData[i][j].reply_user }/" class="replies-user"><span style="margin-right:1rem">↳</span>${ replyData[i][j].reply_user }</a>
+                <p class="replies-content"><span style="margin-right: 0.7rem;">|</span>${ replyData[i][j].reply_content }</p>
+                <p class="replies-delete" id="replies-delete-${ replyData[i][j].reply_id }" onclick="reply_delete(this)" data-mag-id="${ mzId }" data-com-id="${ commentData[i].comment_id }" data-reply-id="${ replyData[i][j].reply_id }">삭제하기</p>
+              </div>
+            `)
+          } else {
+            replies.insertAdjacentHTML('beforeend', `
+              <div class="reply-info">
+                <a href="/accounts/profile/${ replyData[i][j].reply_user }/" class="replies-user"><span style="margin-right:1rem">↳</span>${ replyData[i][j].reply_user }</a>
+                <p class="replies-content"><span style="margin-right: 0.7rem;">|</span>${ replyData[i][j].reply_content }</p>
+              </div>
+                `)
+            }
+          }
+        }
+
       }
     })
   }
@@ -358,12 +515,12 @@
       const commentData = response.data.commentData
       const user = response.data.user
       const mzId = response.data.mzId
+      const replyData = response.data.replyData
 
-      for (i = 0 ; i < commentData.length; i++) {
+      for (let i = 0 ; i < commentData.length; i++) {
 
         let grade = commentData[i].grade
 
-        console.log(grade)
 
         if (grade === '1') {
           grade = '⭐'
@@ -378,62 +535,124 @@
         }
 
         if (user === commentData[i].user_id) {
-        comments.insertAdjacentHTML('beforeend', `
-                <div class="mzdetail-comment">
-          <div class="mzdetail-comment-detail">
-            <div class="d-flex flex-column">
-              <a href="/accounts/profile/${commentData[i].userName}/" class="mzdetail-comment-user">${ commentData[i].userName }</a>
-              <div style="margin-top:10px; display:flex">
-                <p class="mzdetail-comment-update" onclick="comment_update(this)" id="okBtn-${ commentData[i].comment_id }" data-magup-id="${ mzId }" data-commentup-id="${ commentData[i].comment_id }">수정</p>
-                <p class="mzdetail-comment-delete" onclick="comment_delete(this)" id="comment-delete-${ commentData[i].comment_id }" data-magdel-id="${ mzId }" data-commentdel-id="${ commentData[i].comment_id }" style="margin-left: 1.5rem;">삭제</p>
-              </div>
-            </div>
-            <div class="mzdetail-comment-review">
-              <div class="mzdetail-comment-review-okBtn-${ commentData[i].comment_id } review-comment-update-${ commentData[i].comment_id }" style="display:block;">
-                <p class="mzdetail-comment-rate">${ grade }</p>
-                <p class="mzdetail-comment-content">${ commentData[i].content }</p>
-                <p class="mzdetail-comment-time">${ commentData[i].create }</p>
-              </div>
-              <form class="mzcomment-update-form form-comment-update-${ commentData[i].comment_id }" id="form-comment-update-okBtn-${ commentData[i].comment_id }" action="/card/comment_update/${ mzId }/${ commentData[i].comment_id }/" method="post" style="display:none">
-                <div class="mzcomment-update-form-style">
-                  <select class="mzcomment-update-rate" id="comment-update-rate-${ commentData[i].comment_id }" value="${ commentData[i].grade }">
-                    <option selected>${grade}</option>
-                    <option value="1">⭐</option>
-                    <option value="2">⭐⭐</option>
-                    <option value="3">⭐⭐⭐</option>
-                    <option value="4">⭐⭐⭐⭐</option>
-                    <option value="5">⭐⭐⭐⭐⭐</option>
-                  </select>
-                  <input class="mzcomment-update-content" id="comment-update-input-${ commentData[i].comment_id }" type="text" value="${ commentData[i].content }">
-                  <div class="d-flex">
-                    <p class="mzcomment-control-update" onclick="comment_update_ok(this)" id="comment-update-ok-${ commentData[i].comment_id }" data-magup-id="${ mzId }" data-commentup-id="${ commentData[i].comment_id }">수정 완료</p>
-                    <p class="mzcomment-control-update-exit ms-3" onclick="comment_update_exit(this)" id="comment-update-${ commentData[i].comment_id }">취소</p>
-                  </div>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-        `
-        )} else {
           comments.insertAdjacentHTML('beforeend', `
           <div class="mzdetail-comment">
             <div class="mzdetail-comment-detail">
               <div class="d-flex flex-column">
                 <a href="/accounts/profile/${commentData[i].userName}/" class="mzdetail-comment-user">${ commentData[i].userName }</a>
+                <div style="margin-top:10px; display:flex">
+                  <p class="mzdetail-comment-update" onclick="comment_update(this)" id="okBtn-${ commentData[i].comment_id }" data-magup-id="${ mzId }" data-commentup-id="${ commentData[i].comment_id }">수정</p>
+                  <p class="mzdetail-comment-delete" onclick="comment_delete(this)" id="comment-delete-${ commentData[i].comment_id }" data-magdel-id="${ mzId }" data-commentdel-id="${ commentData[i].comment_id }" style="margin-left: 1.5rem;">삭제</p>
+                </div>
               </div>
               <div class="mzdetail-comment-review">
                 <div class="mzdetail-comment-review-okBtn-${ commentData[i].comment_id } review-comment-update-${ commentData[i].comment_id }" style="display:block;">
                   <p class="mzdetail-comment-rate">${ grade }</p>
                   <p class="mzdetail-comment-content">${ commentData[i].content }</p>
                   <p class="mzdetail-comment-time">${ commentData[i].create }</p>
+  
+                  <div class="reply-box">
+                    <div class="replies-${ commentData[i].comment_id }">
+                    </div>
+                    
+                    <div class="reply">
+                      <p class="reply-show" onclick="reply_create_open(this)" id="reply-create-${ commentData[i].comment_id }" style="display:block;">답글 달기</p>
+                      <form action="" class="form-reply" id="form-reply-create-${ commentData[i].comment_id }" method="POST" data-mag-id="${ mzId }" data-com-id="${ commentData[i].comment_id }" style="margin-top: 2rem; display: none;">
+                        <textarea name="content" cols="40" rows="10" style="height: 40px; width: 100%; margin-bottom: 0.5rem;" placeholder="답글 작성" class="reply-write form-control" required id="id_content"></textarea>
+                        <div style="display: flex;">
+                          <input class="mzbtn-reply" onclick="reply_create(this)" id="reply-create-${ commentData[i].comment_id }" type="submit" value="답글 게시">
+                          <p class="mzbtn-cancel" onclick="reply_create_cancel(this)" id="reply-create-${ commentData[i].comment_id }">취소</p>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+  
                 </div>
+                <form class="mzcomment-update-form form-comment-update-${ commentData[i].comment_id }" id="form-comment-update-okBtn-${ commentData[i].comment_id }" action="/magazine/${ mzId }/mzcomment_update/${ commentData[i].comment_id }/" method="post" style="display:none">
+                  <div class="mzcomment-update-form-style">
+                    <select class="mzcomment-update-rate" id="comment-update-rate-${ commentData[i].comment_id }" value="${ commentData[i].grade }">
+                      <option selected value="${ commentData[i].grade }">${grade}</option>
+                      <option value="1">⭐</option>
+                      <option value="2">⭐⭐</option>
+                      <option value="3">⭐⭐⭐</option>
+                      <option value="4">⭐⭐⭐⭐</option>
+                      <option value="5">⭐⭐⭐⭐⭐</option>
+                    </select>
+                    <input class="mzcomment-update-content" id="comment-update-input-${ commentData[i].comment_id }" type="text" value="${ commentData[i].content }">
+                    <div class="d-flex">
+                      <p class="mzcomment-control-update" onclick="comment_update_ok(this)" id="comment-update-ok-${ commentData[i].comment_id }" data-magup-id="${ mzId }" data-commentup-id="${ commentData[i].comment_id }">수정 완료</p>
+                      <p class="mzcomment-control-update-exit ms-3" onclick="comment_update_exit(this)" id="comment-update-${ commentData[i].comment_id }">취소</p>
+                    </div>
+                  </div>
+                </form>
               </div>
             </div>
           </div>
           `
+          )} else {
+            comments.insertAdjacentHTML('beforeend', `
+            <div class="mzdetail-comment">
+              <div class="mzdetail-comment-detail">
+                <div class="d-flex flex-column">
+                  <a href="/accounts/profile/${commentData[i].userName}/" class="mzdetail-comment-user">${ commentData[i].userName }</a>
+                </div>
+                <div class="mzdetail-comment-review">
+                  <div class="mzdetail-comment-review-okBtn-${ commentData[i].comment_id } review-comment-update-${ commentData[i].comment_id }" style="display:block;">
+                    <p class="mzdetail-comment-rate">${ grade }</p>
+                    <p class="mzdetail-comment-content">${ commentData[i].content }</p>
+                    <p class="mzdetail-comment-time">${ commentData[i].create }</p>
+  
+                    <div class="reply-box">
+                      <div class="replies-${ commentData[i].comment_id }">
+                      </div>
+                      
+                      <div class="reply">
+                        <p class="reply-show" onclick="reply_create_open(this)" id="reply-create-${ commentData[i].comment_id }" style="display:block;">답글 달기</p>
+                        <form action="" class="form-reply" id="form-reply-create-${ commentData[i].comment_id }" method="POST" data-mag-id="${ mzId }" data-com-id="${ commentData[i].comment_id }" style="margin-top: 2rem; display: none;">
+                          <textarea name="content" cols="40" rows="10" style="height: 40px; width: 100%; margin-bottom: 0.5rem;" placeholder="답글 작성" class="reply-write form-control" required id="id_content"></textarea>
+                          <div style="display: flex;">
+                            <input class="mzbtn-reply" onclick="reply_create(this)" id="reply-create-${ commentData[i].comment_id }" type="submit" value="답글 게시">
+                            <p class="mzbtn-cancel" onclick="reply_create_cancel(this)" id="reply-create-${ commentData[i].comment_id }">취소</p>
+                          </div>
+                        </form>
+                      </div>
+                    </div>
+  
+                  </div>
+                </div>
+              </div>
+            </div>
+            `
           )
         }
+
+        const replies = document.querySelector(`.replies-${ commentData[i].comment_id }`)
+        replies.textContent = ""
+
+        if (replyData[i].length > 0) {
+
+          for (let j = 0 ; j < replyData[i].length ; j++) {
+            
+            // 대댓글을 단 사람이랑 현재 로그인을 한 사람의 pk가 동일할 때
+            if (replyData[i][j].reply_user_id === user) {
+              replies.insertAdjacentHTML('beforeend', `
+              <div class="reply-info">
+                <a href="/accounts/profile/${ replyData[i][j].reply_user }/" class="replies-user"><span style="margin-right:1rem">↳</span>${ replyData[i][j].reply_user }</a>
+                <p class="replies-content"><span style="margin-right: 0.7rem;">|</span>${ replyData[i][j].reply_content }</p>
+                <p class="replies-delete" id="replies-delete-${ replyData[i][j].reply_id }" onclick="reply_delete(this)" data-mag-id="${ mzId }" data-com-id="${ commentData[i].comment_id }" data-reply-id="${ replyData[i][j].reply_id }">삭제하기</p>
+              </div>
+            `)
+          } else {
+            replies.insertAdjacentHTML('beforeend', `
+              <div class="reply-info">
+                <a href="/accounts/profile/${ replyData[i][j].reply_user }/" class="replies-user"><span style="margin-right:1rem">↳</span>${ replyData[i][j].reply_user }</a>
+                <p class="replies-content"><span style="margin-right: 0.7rem;">|</span>${ replyData[i][j].reply_content }</p>
+              </div>
+                `)
+            }
+          }
+        }
+
       }
     })
   } 
@@ -463,5 +682,121 @@
     commentUpdateForm.style.display = 'none'
     commentForm.style.display = 'block'
   }
+
+
+  //-------------- 대댓글 비동기 -------------------------
+  const reply_create_open = (e) => {
+    const replyForm = document.querySelector(`#form-${ e.id }`)
+    const replyOpenBtn = document.querySelector(`#${ e.id }`)
+
+    if (replyForm.style.display === "none") {
+      replyForm.style.display = 'block'
+      replyOpenBtn.style.display = 'none'
+    }
+  }
+
+  const reply_create_cancel = (e) => {
+    const replyForm = document.querySelector(`#form-${ e.id }`)
+    const replyOpenBtn = document.querySelector(`#${ e.id }`)
+    
+    if (replyForm.style.display === "block") {
+      replyForm.style.display = 'none'
+      replyOpenBtn.style.display = 'block'
+    } 
+  }
+
+  const reply_create = (e) => {
+    console.log(e.id)
+    const replyForm = document.querySelector(`#form-${ e.id }`)
+
+    replyForm.addEventListener('submit', function(event) {
+      console.log(event.target.dataset.magId)
+      event.preventDefault();
+      axios ({
+        method : 'post',
+        url : `/magazine/${ event.target.dataset.magId }/reply_create/${ event.target.dataset.comId }/`,
+        headers: {
+          'X-CSRFToken': csrftoken
+        },
+        data: new FormData(replyForm)
+      }).then(response => {
+
+        const replyData = response.data.replyData
+        const mzId = response.data.mzId
+        const commentId = response.data.comment
+        const user = response.data.user
+
+        const replies = document.querySelector(`.replies-${ commentId }`)
+        replies.textContent = ""
+
+        for (let j = 0 ; j < replyData.length ; j++) {
+          
+          // 대댓글을 단 사람이랑 현재 로그인을 한 사람의 pk가 동일할 때
+          if (replyData[j].reply_user_id === user) {
+            replies.insertAdjacentHTML('beforeend', `
+            <div class="reply-info">
+                <a href="/accounts/profile/${ replyData[j].reply_user }/" class="replies-user"><span style="margin-right:1rem">↳</span>${ replyData[j].reply_user }</a>
+                <p class="replies-content"><span style="margin-right: 0.7rem;">|</span>${ replyData[j].reply_content }</p>
+                <p class="replies-delete" id="replies-delete-${ replyData[j].reply_id }" onclick="reply_delete(this)" data-mag-id="${ mzId }" data-com-id="${ commentId }" data-reply-id="${ replyData[j].reply_id }">삭제하기</p>
+            </div>
+            `)
+          } else {
+            replies.insertAdjacentHTML('beforeend', `
+              <div class="reply-info">
+                <a href="/accounts/profile/${ replyData[j].reply_user }/" class="replies-user"><span style="margin-right:1rem">↳</span>${ replyData[j].reply_user }</a>
+                <p class="replies-content"><span style="margin-right: 0.7rem;">|</span>${ replyData[j].reply_content }</p>
+              </div>
+              `)
+          }
+        }
+
+      })
+      replyForm.reset()
+    })
+  }
+
+  const reply_delete = (e) => {
+
+    const replyDelete = document.querySelector(`#${ e.id }`)
+
+    axios({
+      method: 'get',
+      url: `/magazine/${ event.target.dataset.magId }/${ event.target.dataset.comId }/reply_delete/${ event.target.dataset.replyId }/`,
+      headers: {
+        'X-CSRFToken': csrftoken
+      },
+    }) .then(response => {
+      const replyData = response.data.replyData
+      const mzId = response.data.mzId
+      const commentId = response.data.comment
+      const user = response.data.user
+
+      const replies = document.querySelector(`.replies-${ commentId }`)
+      replies.textContent = ""
+
+      for (let j = 0 ; j < replyData.length ; j++) {
+        
+        // 대댓글을 단 사람이랑 현재 로그인을 한 사람의 pk가 동일할 때
+        if (replyData[j].reply_user_id === user) {
+          replies.insertAdjacentHTML('beforeend', `
+          <div class="reply-info">
+              <a href="/accounts/profile/${ replyData[j].reply_user }/" class="replies-user"><span style="margin-right:1rem">↳</span>${ replyData[j].reply_user }</a>
+              <p class="replies-content"><span style="margin-right: 0.7rem;">|</span>${ replyData[j].reply_content }</p>
+              <p class="replies-delete" id="replies-delete-${ replyData[j].reply_id }" onclick="reply_delete(this)" data-mag-id="${ mzId }" data-com-id="${ commentId }" data-reply-id="${ replyData[j].reply_id }">삭제하기</p>
+          </div>
+          `)
+        } else {
+          replies.insertAdjacentHTML('beforeend', `
+            <div class="reply-info">
+              <a href="/accounts/profile/${ replyData[j].reply_user }/" class="replies-user"><span style="margin-right:1rem">↳</span>${ replyData[j].reply_user }</a>
+              <p class="replies-content"><span style="margin-right: 0.7rem;">|</span>${ replyData[j].reply_content }</p>
+            </div>
+            `)
+        }
+      }
+    })
+
+  }
+
   </script>
 {% endblock script %}
