@@ -73,19 +73,22 @@ def detail(request,pk):
         'comments':comment,
     }
     return render(request, 'servicecenter/detail.html', context)
-
+from django.contrib import messages
 def comment(request, pk):
     service = ServiceQuestion.objects.get(id = pk)
     user = request.user.pk
 
     if request.method == 'POST':
-        comment_form = ServiceCommentCreateForm(request.POST)
-        if comment_form.is_valid():
-            form = comment_form.save(commit=False)
-            form.quest_id = pk
-            form.user = request.user
-            form.save()
+        if request.user.is_staff == True:
 
+            comment_form = ServiceCommentCreateForm(request.POST)
+            if comment_form.is_valid():
+                form = comment_form.save(commit=False)
+                form.quest_id = pk
+                form.user = request.user
+                form.save()
+        else:
+            messages.warning(request,'not staff')
     comments = ServiceComment.objects.filter(quest_id = service.id).order_by("-created_at")
     comment_data = []
 
