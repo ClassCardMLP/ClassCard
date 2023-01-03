@@ -192,35 +192,14 @@ def nav_search(request):
 
 
 # 테스트용 함수입니다.
+from django.db.models import Avg
 def tete(request):
-    # card = Card.objects.get(pk=1)
-    # card_list = DetailComment.objects.values_list('card_id',flat=True).annotate(avg=Avg('rate'))
-    #     # 애완동물을 위한 카드
-    # context = {
-    #     'card_list' : card_list,
-    # }
-    bene = Benefit()
-    card1 = Card.objects.get(pk=668)  # 현대카드
-    bene1 = card1.bene_set.all()
-    card2 = Card.objects.get(pk=1109)  # 삼성 id
-    card3 = Card.objects.get(pk=2252)  # 내맘대로 쁨
-    card4 = Card.objects.get(pk=1)
-    card5 = Card.objects.get(pk=216)
-    card6 = Card.objects.get(pk=73)
-    card7 = Card.objects.get(pk=1214)
-    card8 = Card.objects.get(pk=1666)
-    card9 = Card.objects.get(pk=1850)
+    cards = Card.objects.get(pk=1)
+    card_rate = cards.detailcomment_set.aggregate(Avg('rate'))
+
     context = {
-        "card1": card1,
-        "card2": card2,
-        "card2": card3,
-        "card4": card4,
-        "card5": card5,
-        "card6": card6,
-        "card7": card7,
-        "card8": card8,
-        "card9": card9,
-        "bene1": bene1,
+        'cards' : cards,
+        'card_rate' : card_rate,
     }
     return render(request, "tete.html", context)
 

@@ -1,8 +1,10 @@
-{% comment %} 테스트 html {% endcomment %}
 {% extends 'base.html' %}
+{% comment %} 테스트 html {% endcomment %}
 {% block body %}
   <h1>tete</h1>
   {% comment %} {{card_list}} {% endcomment %}
-  {{card4.card_img}}
-  {{bene1}}
+  <a href="{% url 'card:detail' 1 %}">
+    {{cards.card_name}}
+  </a>
+  {{card_rate}}
 {% endblock body %}
