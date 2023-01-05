@@ -376,6 +376,7 @@
 <div style='padding-bottom:5rem; background-color: #ebebeb;'>
   <div class="detail-comment-create container">
     <p class="detail-comment-title">카드 후기</p>
+    {% if request.user.is_authenticated %}
     <form action="{% url 'card:comment' card_id %}" method="POST" class="detail-comment-form" data-card-id="{{ card_id }}">
       <div class="detail-comment-input-box">
         {% csrf_token %}
@@ -390,6 +391,10 @@
       </div>
       <input class="btn-detail-comment" type="submit" value="Submit">
     </form>
+    {% else %}
+    <p style="font-size:1.5rem; color: #757d89;">후기를 쓰기 위해 로그인을 하세요</p>
+    <a class="comment-login" href="/login/?next=/card/detail/{{ card_id }}/">로그인 하기</a>
+    {% endif %}
   </div>
   <div style="background-color:#ebebeb;">
     <div class="detail-comment-box container">

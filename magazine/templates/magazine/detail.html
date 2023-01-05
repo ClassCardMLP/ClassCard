@@ -58,6 +58,7 @@
 <div style='padding-bottom:5rem; background-color: #ebebeb;'>
   <div class="mzdetail-comment-create container">
     <p class="mzdetail-comment-title">댓글 작성</p>
+    {% if request.user.is_authenticated %}
     <form action="" method="POST" class="mzdetail-comment-form" data-mag-id="{{ magazine.pk }}">
       <div class="mzdetail-comment-input-box">
         {% csrf_token %}
@@ -72,6 +73,10 @@
       </div>
       <input class="mzbtn-detail-comment" type="submit" value="Submit">
     </form>
+    {% else %}
+    <p style="font-size:1.5rem; color: #757d89;">후기를 쓰기 위해 로그인을 하세요</p>
+    <a class="mzcomment-login" href="/login/?next=/magazine/{{ magazine.id }}/">로그인 하기</a>
+    {% endif %}
   </div>
   <div style="background-color:#ebebeb;">
     <div class="mzdetail-comment-box container">
