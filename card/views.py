@@ -347,37 +347,38 @@ def comment(request, pk):
     card = Card.objects.get(pk=pk)
     user = request.user.pk
 
-    if request.method == "POST":
-        comment_form = DetailCommentForm(request.POST)
+    if request.user.is_authenticated:
+        if request.method == "POST":
+            comment_form = DetailCommentForm(request.POST)
 
-        if comment_form.is_valid():
-            comment = comment_form.save(commit=False)
-            comment.card = card
-            comment.user = request.user
-            comment.save()
+            if comment_form.is_valid():
+                comment = comment_form.save(commit=False)
+                comment.card = card
+                comment.user = request.user
+                comment.save()
 
-    comments = DetailComment.objects.filter(card_id=pk).order_by("-updated_at")
-    comment_data = []
+        comments = DetailComment.objects.filter(card_id=pk).order_by("-updated_at")
+        comment_data = []
 
-    for comment in comments:
-        comment_data.append(
-            {
-                "user_id": comment.user.id,
-                "comment_id": comment.id,
-                "userName": comment.user.username,
-                "rate": comment.rate,
-                "content": comment.content,
-                "update": comment.updated_at,
-            }
-        )
+        for comment in comments:
+            comment_data.append(
+                {
+                    "user_id": comment.user.id,
+                    "comment_id": comment.id,
+                    "userName": comment.user.username,
+                    "rate": comment.rate,
+                    "content": comment.content,
+                    "update": comment.updated_at,
+                }
+            )
 
-    data = {
-        "commentData": comment_data,
-        "user": user,
-        "cardId": card.pk,
-    }
+        data = {
+            "commentData": comment_data,
+            "user": user,
+            "cardId": card.pk,
+        }
 
-    return JsonResponse(data)
+        return JsonResponse(data)
 
 
 @login_required(login_url='/login/')
