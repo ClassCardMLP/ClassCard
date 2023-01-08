@@ -68,18 +68,25 @@
   color: #004CE2;
   padding: 20px 47px 20px 47px;
   border-radius: 5px;
+  box-shadow: 0 0 2px 0;
+}
+
+.card-btn-1:hover {
+  filter: brightness(98%);
 }
 
 .card-btn-2 {
-  background-color: #2767E4;
-  border: 1px solid #2767E4;
+  border: 1px solid #77adff;
   color: white;
   padding: 20px 47px 20px 47px;
   border-radius: 5px;
+  background-image: linear-gradient(to right, #25aae1, #4481eb, #04befe, #3f86ed);
+  box-shadow: 0 4px 15px 0 rgba(65, 132, 234, 0.75);   
 }
 
 .card-btn-2:hover {
   color: white;
+  filter: brightness(98%);
 }
 
 .cardText {
