@@ -84,29 +84,28 @@
         </div>
       </div>
       {% endfor %}
-    </div>
-  </div>
-
-  <!-- 페이지네이션 -->
-  <div class="mt-5 d-flex justify-content-center">
-
-    {% if card_list.has_previous %}
-      <a href="?page={{card_list.previous_page_number}}">이전</a>
-    {% endif %}
-
-    {% for p in card_list.paginator.page_range %}
-      {% if p >= card_list.number|add:-2 and p <= card_list.number|add:2 %}
-        {% if p == card_list.number %}
-          <a href="?page={{p}}" class="mx-1">{{p}}</a>
-        {% else %}
-          <a href="?page={{p}}" class="mx-1">{{p}}</a>
+      <!-- 페이지네이션 -->
+      <div class="mt-5 d-flex justify-content-center">
+    
+        {% if card_list.has_previous %}
+          <a href="?page={{card_list.previous_page_number}}">이전</a>
         {% endif %}
-      {% endif %}
-    {% endfor %}
-
-    {% if card_list.has_next %}
-      <a href="?page={{card_list.next_page_number}}">다음</a>
-    {% endif %}
+    
+        {% for p in card_list.paginator.page_range %}
+          {% if p >= card_list.number|add:-2 and p <= card_list.number|add:2 %}
+            {% if p == card_list.number %}
+              <a href="?page={{p}}" class="mx-1">{{p}}</a>
+            {% else %}
+              <a href="?page={{p}}" class="mx-1">{{p}}</a>
+            {% endif %}
+          {% endif %}
+        {% endfor %}
+    
+        {% if card_list.has_next %}
+          <a href="?page={{card_list.next_page_number}}">다음</a>
+        {% endif %}
+      </div>
+    </div>
   </div>
 </div>
 
