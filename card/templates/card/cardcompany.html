@@ -9,19 +9,82 @@
 {% block body %}
  
 <div class="mt-5 container">
-  <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4">
-  {% for card in card_list %} 
-  <div class="col d-flex justify-content-center ">
-    <a href="{% url 'card:detail' card.pk %}" style="width: 170px;">
-      <div class="my-4 card-cardcompany-image-box">
-        <img class="card-cardcompany-banner-card-image" src="{{ card.card_img }}" alt="">
+  <div class="row">
+    <div class="tabMenu col-sm-3 d-flex justify-content-center" style="position: relative;">
+      <div style="position: sticky; top: 100px; height: 500px;">
+        <ul class="list-unstyled shadow" style="text-align: center; height: 530px; padding: 30px 20px 30px 20px; border: 1px solid #b9b9b9; border-radius: 5px; font-size: 18px;">
+          <li style="width: 180px;"><a class="tabList" href="/card/cardcompany/신한카드">신한카드</a></li>
+          <li><a class="tabList" href="/card/cardcompany/삼성카드">삼성카드</a></li>
+          <li><a class="tabList" href="/card/cardcompany/KB국민카드">국민카드</a></li>
+          <li><a class="tabList" href="/card/cardcompany/롯데카드">롯데카드</a></li>
+          <li><a class="tabList" href="/card/cardcompany/하나카드">하나카드</a></li>
+          <li><a class="tabList" href="/card/cardcompany/NH농협카드">농협카드</a></li>
+          <li><a class="tabList" href="/card/cardcompany/IBK기업은행">기업은행</a></li>
+          <li><a class="tabList" href="/card/cardcompany/현대카드">현대카드</a></li>
+          <li><a class="tabList" href="/card/cardcompany/우리카드">우리카드</a></li>
+          <li><a class="tabList" href="/card/cardcompany/BNK부산은행">부산은행</a></li>
+        </ul>
       </div>
-      <div style="text-align: center;">
-        <p>{{ card.card_name }}</p>
+    </div>    
+    <div class="col-sm-9">
+      {% for card in card_list %} 
+      <div class="mb-4 cardBox shadow">
+        <div style="padding: 15px 20px 10px 20px;">
+          <h6 class="mb-3">{{ card.card_brand }}</h6>
+          <h4 class="mb-2">{{ card.card_name }}</h4>
+        </div>
+        <hr class="m-0">
+        <div style="padding: 10px 25px 10px 25px;">
+          <div class="row">
+            <div class="col-sm-12 col-md-4 my-4 card-cardcompany-image-box">
+              <a href="{% url 'card:detail' card.pk %}" style="width: 170px;">
+                <img class="card-cardcompany-banner-card-image" src="{{ card.card_img }}" alt="">
+              </a>
+            </div>  
+            <div class="col-sm-12 col-md-6 cardText">
+              {% if card.card_in_out_2 != None  %}
+              <p style="font-size: 18px;">{{ card.card_in_out_1 }} / {{ card.card_in_out_2 }}</p>
+              {% elif card.card_in_out_3 != None %}
+              <p style="font-size: 18px;">{{ card.card_in_out_1 }} / {{ card.card_in_out_2 }} / {{ card.card_in_out_3 }}</p>
+              {% else %}
+              <p style="font-size: 18px;">{{ card.card_in_out_1 }}</p>
+              {% endif %}
+              <p style="font-size: 18px;">{{ card.card_record }}</p>
+              <div>
+                <p style="font-size: 18px;">{{ card.card_overseas }}</p>
+              </div>
+            </div>
+            <div class="col-sm-12 col-md-2 cardBtn" style="padding: 35px 0px 35px 0px; text-align: center;">
+              <a href="{% url 'card:detail' card.pk %}" type="button" class="card-btn-1 mb-3">상세보기</a>
+              <div class="requestBtn">
+                {% if card.card_brand == "신한카드" %}
+                <a class="card-btn-2" type="button" href="https://www.shinhancard.com/pconts/html/main.html#utm_source=naver_pc&utm_medium=brandsearch_sa&utm_campaign=home_button">카드신청</a>               
+                {% elif card.card_brand == "BNK부산은행" %}
+                <a class="card-btn-2" type="button" href="https://www.busanbank.co.kr/ib20/mnu/FPMCRD122001001">카드신청</a>
+                {% elif card.card_brand == "IBK기업은행" %}                
+                <a class="card-btn-2" type="button" href="https://www.ibk.co.kr/card/mainList.ibk">카드신청</a>               
+                {% elif card.card_brand == "KB국민카드" %}               
+                <a class="card-btn-2" type="button" href="https://card.kbcard.com/CMN/DVIEW/HOAMCXPRIZZC0002">카드신청</a>                
+                {% elif card.card_brand == "NH농협카드" %}              
+                <a class="card-btn-2" type="button" href="https://card.nonghyup.com/IPCC01.menu">카드신청</a>             
+                {% elif card.card_brand == "롯데카드" %}                
+                <a class="card-btn-2" type="button" href="https://www.lottecard.co.kr/app/LPMAIAA_V100.lc?referrer=https%3A%2F%2Fwww.google.com%2F">카드신청</a>                
+                {% elif card.card_brand == "삼성카드" %}               
+                <a class="card-btn-2" type="button" href="https://www.samsungcard.com/personal/main/UHPPCO0101M0.jsp">카드신청</a>                
+                {% elif card.card_brand == "우리카드" %}               
+                <a class="card-btn-2" type="button" href="https://pc.wooricard.com/dcpc/main.do">카드신청</a>                
+                {% elif card.card_brand == "하나카드" %}                
+                <a class="card-btn-2" type="button" href="https://www.hanacard.co.kr/OPH30000000N.web?_frame=no&schID=pcd&mID=OPH30000000C&">카드신청</a>               
+                {% elif card.card_brand == "현대카드" %}               
+                <a class="card-btn-2" type="button" href="https://www.hyundaicard.com/index.jsp">카드신청</a>               
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-    </a>
-  </div>
-  {% endfor %}
+      {% endfor %}
+    </div>
   </div>
 
   <!-- 페이지네이션 -->
@@ -56,15 +119,14 @@
         console.log('회전하기!')
         bannerCardImage[i].style.width = '110px';
         bannerCardImage[i].style.height = '170px';
-        bannerCardImage[i].style.borderRadius = '15px';
-        bannerCardImage[i].classList.add('banner-rotate90')
+        bannerCardImage[i].classList.add('banner-rotate90');
+        bannerCardImage[i].style.margin = '17px';
       } else {
         bannerCardImage[i].style.width = '170px';
         bannerCardImage[i].style.height = '110px';
-        bannerCardImage[i].style.borderRadius = '15px';
       }
 
-    } 
+    }
 </script>
 
 {% endblock body %}

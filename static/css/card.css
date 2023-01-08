@@ -27,7 +27,7 @@
   height:30px;
 }
 
-.card-cardcompany-image-box{
+.card-cardcompany-image-box {
   width: 170px;
   height: 150px;
   display: flex;
@@ -35,13 +35,73 @@
   align-items: center;
   background-color: #e2e2e2;
   border-radius: 50%;
+  margin-left: 40px;
+  margin-right: 40px;
 }
 
 .banner-rotate90 {
   transform: rotate(270deg);
 }
 
-.card-cardcompany-banner-card-image:hover {
-  transform: translate(-0rem, -1rem);
-  transition: all 0.5s ease-out;
+.tabList {
+  width: 180px;
+  height: 45px;
+  text-align: center;
+  line-height: 45px;
+}
+
+.tabList:hover {
+  display:block;
+  border-bottom:1px #3399dd solid;
+  text-align:center; 
+  cursor: pointer;
+}
+
+.cardBox {
+  border: 1px solid #b9b9b9;
+  border-radius: 5px;
+}
+
+.card-btn-1 {
+  background-color: white;
+  border: 1px solid #487EE9;
+  color: #004CE2;
+  padding: 20px 47px 20px 47px;
+  border-radius: 5px;
+}
+
+.card-btn-2 {
+  background-color: #2767E4;
+  border: 1px solid #2767E4;
+  color: white;
+  padding: 20px 47px 20px 47px;
+  border-radius: 5px;
+}
+
+.card-btn-2:hover {
+  color: white;
+}
+
+.cardText {
+  margin: 37px 0px 37px 0px;
+}
+
+@media all and (max-width:700px) {
+  .tabMenu {
+    display: none !important;
+  }
+  .row {
+    justify-content: center;
+    text-align: center;
+  }
+  .cardBtn {
+    display: flex;
+    justify-content: center;
+  }
+  .requestBtn {
+    margin-left: 10px;
+  }
+  .cardText {
+    margin: 0px;
+  }
 }
