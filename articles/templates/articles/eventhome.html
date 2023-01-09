@@ -208,32 +208,59 @@
           <div class="container">
             <div class="row">
               <div style="margin-bottom: 30px;" class="col-md-6">             
-                <div style="border-radius: 40px;" class="card">
-                  <img style="border-radius: 40px; width: 100%; height: 180px;" src="https://api.card-gorilla.com:8080/storage/corp/2/tips/27304/tips_1669360315693.png" alt="">           
+                <div style="border-radius: 40px;" class="">
+                  <!-- <img style="border-radius: 40px; width: 100%; height: 180px;" src="https://api.card-gorilla.com:8080/storage/corp/2/tips/27304/tips_1669360315693.png" alt="">            -->
+
+                  <!-- Button trigger modal -->
+                  <!-- <button type="button" > -->
+                    <img class="btn" data-bs-toggle="modal" data-bs-target="#exampleModal" style="border-radius: 40px; width: 100%; height: 180px;" src="https://api.card-gorilla.com:8080/storage/corp/2/tips/27304/tips_1669360315693.png" alt="">           
+                  <!-- </button> -->
+
+                  <!-- Modal -->
+                  <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
+                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                          ...
+                        </div>
+                        <div class="modal-footer">
+                          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                          <button type="button" class="btn btn-primary">Save changes</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  
+
                 </div>
               </div>
               <div class="col-md-6">
-                <div style="border-radius: 40px;" class="card">
+                <div style="border-radius: 40px;" class="">
                   <img style="border-radius: 40px; width: 100%; height: 180px;" src="https://api.card-gorilla.com:8080/storage/corp/2/tips/27303/tips_1669360268692.png" alt="">
                 </div>
               </div>
               <div style="margin-top: 30px;" class="col-md-6">
-                <div style="border-radius: 40px;" class="card">
+                <div style="border-radius: 40px;" class="">
                   <img style="border-radius: 40px; width: 100%; height: 180px;" src="https://api.card-gorilla.com:8080/storage/corp/7/tips/26928/tips_1665973834146.png" alt="">
                 </div>
               </div>
               <div style="margin-top: 30px;" class="col-md-6">
-                <div style="border-radius: 40px;" class="card">
+                <div style="border-radius: 40px;" class="">
                   <img style="border-radius: 40px; width: 100%; height: 180px;" src="https://api.card-gorilla.com:8080/storage/corp/2/tips/27335/tips_1669684550973.png" alt="">
                 </div>
               </div>
               <div class="col-md-6">
-                <div style="margin-top: 30px; border-radius: 40px;" class="card">
+                <div style="margin-top: 30px; border-radius: 40px;" class="">
                   <img style="border-radius: 40px; width: 100%; height: 180px;" src="https://api.card-gorilla.com:8080/storage/corp/7/tips/26692/tips_1663917949821.png" alt="">
                 </div>
               </div>
               <div class="col-md-6">
-                <div style="margin-top: 30px; border-radius: 40px;" class="card">
+                <div style="margin-top: 30px; border-radius: 40px;" class="">
                   <img style="border-radius: 40px; width: 100%; height: 180px;" src="https://api.card-gorilla.com:8080/storage/corp/7/tips/26736/tips_1664427266096.png" alt="">
                 </div>
               </div>
@@ -326,6 +353,15 @@
         $("#" + tab_id).addClass('current');
 
     });
+
+    // 모달창
+    const myModal = document.getElementById('myModal')
+    const myInput = document.getElementById('myInput')
+
+    myModal.addEventListener('shown.bs.modal', () => {
+      myInput.focus()
+    })
+
 </script>
 
 
