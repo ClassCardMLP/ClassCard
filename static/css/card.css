@@ -27,7 +27,7 @@
   height:30px;
 }
 
-.card-cardcompany-image-box{
+.card-cardcompany-image-box {
   width: 170px;
   height: 150px;
   display: flex;
@@ -35,13 +35,81 @@
   align-items: center;
   background-color: #e2e2e2;
   border-radius: 50%;
+  margin-left: 40px;
+  margin-right: 40px;
 }
 
 .banner-rotate90 {
   transform: rotate(270deg);
 }
 
-.card-cardcompany-banner-card-image:hover {
-  transform: translate(-0rem, -1rem);
-  transition: all 0.5s ease-out;
+.tabList {
+  width: 180px;
+  height: 45px;
+  text-align: center;
+  line-height: 45px;
+}
+
+.tabList:hover {
+  display:block;
+  border-bottom:1px #3399dd solid;
+  text-align:center; 
+  cursor: pointer;
+}
+
+.cardBox {
+  border: 1px solid #b9b9b9;
+  border-radius: 5px;
+}
+
+.card-btn-1 {
+  background-color: white;
+  border: 1px solid #487EE9;
+  color: #004CE2;
+  padding: 20px 43px 20px 43px;
+  border-radius: 5px;
+  box-shadow: 0 0 2px 0;
+}
+
+.card-btn-1:hover {
+  filter: brightness(98%);
+}
+
+.card-btn-2 {
+  border: 1px solid #77adff;
+  color: white;
+  padding: 20px 43px 20px 43px;
+  border-radius: 5px;
+  background-image: linear-gradient(to right, #25aae1, #4481eb, #04befe, #3f86ed);
+  box-shadow: 0 4px 15px 0 rgba(65, 132, 234, 0.75);   
+}
+
+.card-btn-2:hover {
+  color: white;
+  filter: brightness(98%);
+}
+
+.cardText {
+  margin: 37px 0px 37px 0px;
+  padding: 0px;
+}
+
+@media all and (max-width:700px) {
+  .tabMenu {
+    display: none !important;
+  }
+  .row {
+    justify-content: center;
+    text-align: center;
+  }
+  .cardBtn {
+    display: flex;
+    justify-content: center;
+  }
+  .requestBtn {
+    margin-left: 10px;
+  }
+  .cardText {
+    margin: 0px;
+  }
 }

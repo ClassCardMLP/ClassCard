@@ -494,8 +494,8 @@ def cardcompany(request,company):
 
 
     page = request.GET.get('page')
-    card_list = Card.objects.filter(card_brand=company)
-    paginator = Paginator(card_list, 20)
+    card_list = Card.objects.filter(card_brand=company).order_by('id')
+    paginator = Paginator(card_list, 10)
     cards = paginator.get_page(page)
 
     context = {
