@@ -3,8 +3,11 @@
 {% block body %}
   <h1>tete</h1>
   {% comment %} {{card_list}} {% endcomment %}
+  {{cards|length}}<br>
+  {% for card in cards %}
   <a href="{% url 'card:detail' 1 %}">
-    {{cards.card_name}}
+    {{card.card_id}}|{{card.card_rate}}<br>
   </a>
-  {{card_rate}}
+  {% endfor %}
+  {{card1.card_name}}
 {% endblock body %}

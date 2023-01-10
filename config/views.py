@@ -127,27 +127,51 @@ def main(request):
         compare_cards = CompareCard.objects.filter(user=request.user)
     else:
         compare_cards = '로그인을 해야 카드 비교 기능을 사용하실 수 있습니다'
+    
+    cr = DetailComment.objects.values('card_id').annotate(card_rate=Avg('rate')).values('card_rate','card_id').order_by('-card_rate')[:9]
+    cr = list(cr)
+    if len(cr) < 9:
+        while len(cr) < 9:
+            cr.append({'card_id' :1,'card_rate':0.0}) # 임시카드
 
-    card1 = Card.objects.get(pk=668) # 현대카드
-    card2 = Card.objects.get(pk=1109) # 삼성 id
-    card3 = Card.objects.get(pk=2252) # 내맘대로 쁨
-    card4 = Card.objects.get(pk=2181)
-    card5 = Card.objects.get(pk=85)
-    card6 = Card.objects.get(pk=2256)
-    card7 = Card.objects.get(pk=2182)
-    card8 = Card.objects.get(pk=26)
-    card9 = Card.objects.get(pk=2334)
+    card1 = Card.objects.get(pk=cr[0]['card_id']) 
+    card1_bene = Benefit.objects.filter(card_id=cr[0]['card_id'])[0]
+    card2 = Card.objects.get(pk=cr[1]['card_id']) 
+    card2_bene = Benefit.objects.filter(card_id=cr[1]['card_id'])[0]
+    card3 = Card.objects.get(pk=cr[2]['card_id']) 
+    card3_bene = Benefit.objects.filter(card_id=cr[2]['card_id'])[0]
+    card4 = Card.objects.get(pk=cr[3]['card_id'])
+    card4_bene = Benefit.objects.filter(card_id=cr[3]['card_id'])[0]
+    card5 = Card.objects.get(pk=cr[4]['card_id'])
+    card5_bene = Benefit.objects.filter(card_id=cr[4]['card_id'])[0]
+    card6 = Card.objects.get(pk=cr[5]['card_id'])
+    card6_bene = Benefit.objects.filter(card_id=cr[5]['card_id'])[0]
+    card7 = Card.objects.get(pk=cr[6]['card_id'])
+    card7_bene = Benefit.objects.filter(card_id=cr[6]['card_id'])[0]
+    card8 = Card.objects.get(pk=cr[7]['card_id'])
+    card8_bene = Benefit.objects.filter(card_id=cr[7]['card_id'])[0]
+    card9 = Card.objects.get(pk=cr[8]['card_id'])
+    card9_bene = Benefit.objects.filter(card_id=cr[8]['card_id'])[0]
     context = {
         'compare_cards' : compare_cards,
         'card1' : card1,
+        'card1_bene' : card1_bene,
         'card2' : card2,
+        'card2_bene' : card2_bene,
         'card3' : card3,
+        'card3_bene' : card3_bene,
         'card4' : card4,
+        'card4_bene' : card4_bene,
         'card5' : card5,
+        'card5_bene' : card5_bene,
         'card6' : card6,
+        'card6_bene' : card6_bene,
         'card7' : card7,
+        'card7_bene' : card7_bene,
         'card8' : card8,
+        'card8_bene' : card8_bene,
         'card9' : card9,
+        'card9_bene' : card9_bene,
     }
     return render(request, "main.html", context)
 
@@ -194,12 +218,16 @@ def nav_search(request):
 # 테스트용 함수입니다.
 from django.db.models import Avg
 def tete(request):
-    cards = Card.objects.get(pk=1)
-    card_rate = cards.detailcomment_set.aggregate(Avg('rate'))
-
+    cr = DetailComment.objects.values('card_id').annotate(card_rate=Avg('rate')).values('card_rate','card_id').order_by('-card_rate')[:9]
+    cr = list(cr)
+    if len(cr) < 9:
+        while len(cr) < 9:
+            cr.append({'card_id' :1,'card_rate':0.0})
+    
+    card1 = Card.objects.get(pk=cr[0]['card_id'])
     context = {
-        'cards' : cards,
-        'card_rate' : card_rate,
+        'cards' : cr,
+        'card1' : card1,
     }
     return render(request, "tete.html", context)
 
