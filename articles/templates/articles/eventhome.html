@@ -173,7 +173,7 @@ button:hover .arrow:before {
     margin: -250px 0 0 -250px;
     background:#eee;
     z-index: 2;
-    border-radius: 40px;
+
   }
 
 .black_bg{
@@ -202,6 +202,11 @@ button:hover .arrow:before {
     text-indent: -9999px;
 }
 
+/* 모달 안의 카드 효과 */
+.event_card :hover {
+  letter-spacing: -0.05em;
+  cursor: pointer;
+}
 </style>
 
 {% endblock css %}
@@ -223,10 +228,10 @@ button:hover .arrow:before {
   </div>
 </div>
 
-<div class="py-0">
+<!-- <div class="py-0">
   <div class="container text-center">
       <button_1 
-        style="border-style: none; border-radius: 30px; background-color: #0071E3; color: #fff;;"  
+        style="border-style: none; border-radius: 30px; background-color: #0071E3; color: #fff;"  
         type="button" 
         class="btn1 text-center"
       >이벤트 FAQ</button_1>
@@ -236,7 +241,7 @@ button:hover .arrow:before {
         class="btn1 text-center"
       >상품 검색</button_2>
   </div>
-</div>
+</div> -->
 
 
 
@@ -278,7 +283,21 @@ button:hover .arrow:before {
                 <div class="black_bg"></div>
                 <div class="modal_wrap">
                   <div class="modal_close"><a href="#">close</a></div>
-                  <div> 모달창 내용 </div>
+                  <div style="position: relative; max-width: 657px; max-height: calc(100vh - 150px);" class="banner">
+                    <h3 style="padding: 0;" class="titing">
+                      <img style="max-width: 100%; border: 0; vertical-align: top;" 
+                      src="https://api.card-gorilla.com:8080/storage/corp/2/tips/27304/tips_1669360315693.png" alt="">
+                    </h3>
+                    <div style="background-color: #fff; padding: 30px;">
+                      <p class="title">대상 상품 카드</p>
+                      <div class="container" style="background-color: #f1f1f1; padding: 10px 20px; border-radius: 5px; font-size: 15px; color: #333;
+                        font-weight: 700; margin-top: 10px; display: table; width: 100%; min-height: 96px;">
+                        <span style="padding-right: 20px; width: 100px; text-align: center;">
+                          <img class="event_card" src="https://api.card-gorilla.com:8080/storage/card/2411/card_img/26602/2411card.png" alt="">
+                        </span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
                 </div>
 
@@ -401,20 +420,19 @@ button:hover .arrow:before {
     });
 
     // 모달창
-     window.onload = function() {
- 
-    function onClick() {
-        document.querySelector('.modal_wrap').style.display ='block';
-        document.querySelector('.black_bg').style.display ='block';
-    }   
-    function offClick() {
-        document.querySelector('.modal_wrap').style.display ='none';
-        document.querySelector('.black_bg').style.display ='none';
-    }
- 
-    document.getElementById('modal_btn').addEventListener('click', onClick);
-    document.querySelector('.modal_close').addEventListener('click', offClick);
- 
+    window.onload = function() {
+
+    function onClick() {
+        document.querySelector('.modal_wrap').style.display ='block';
+        document.querySelector('.black_bg').style.display ='block';
+    }
+    function offClick() {
+        document.querySelector('.modal_wrap').style.display ='none';
+        document.querySelector('.black_bg').style.display ='none';
+    }
+
+    document.getElementById('modal_btn').addEventListener('click', onClick);
+    document.querySelector('.modal_close').addEventListener('click', offClick);
 };
 
 </script>
